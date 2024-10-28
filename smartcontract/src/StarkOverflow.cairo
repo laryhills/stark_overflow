@@ -1,26 +1,38 @@
-use openzeppelin::access::ownable::OwnableComponent;
+use stark_overflow::structs::{Question, Answer, QuestionStatus};
 
 #[starknet::interface]
 pub trait IStarkOverflow<T> {
     fn askQuestion(ref self: T, description: ByteArray, value: u256) -> u256;
-    fn addFundsToQuestion(ref self: T, questionId: u256, value: u256);
-    fn submitAnswer(ref self: T, questionId: u256, answer: ByteArray);
-    fn markAnswerAsCorrect(ref self: T, questionId: u256, answerId: u256);
-    fn withdrawFunds(ref self: T, amount: u256);
+    fn getQuestion(ref self: T, question_id: u256) -> Question;
+    // fn addFundsToQuestion(ref self: T, questionId: u256, value: u256);
+    // fn submitAnswer(ref self: T, questionId: u256, answer: ByteArray);
+    // fn markAnswerAsCorrect(ref self: T, questionId: u256, answerId: u256);
+    // fn withdrawFunds(ref self: T, amount: u256);
 }
 
 #[starknet::contract]
 pub mod StarkOverflow {
-    use stark_overflow::structs::{Question, Answer, QuestionStatus};
-    use stark_overflow::events::{};
+    use super::{Question, Answer, QuestionStatus};
+    use stark_overflow::events::{QuestionAnswered, ChosenAnswer};
+    use stark_overflow::utils::{generate_question_id};
     use openzeppelin_access::ownable::OwnableComponent;
-    use starknet::{get_caller_address}
+    use starknet::{get_caller_address, ContractAddress};
+    use starknet::storage::{StoragePointerReadAccess, StoragePointerWriteAccess, StoragePathEntry, Map};
 
     component!(path: OwnableComponent, storage: ownable, event: OwnableEvent);
 
     #[abi(embed_v0)]
     impl OwnableMixinImpl = OwnableComponent::OwnableMixinImpl<ContractState>;
     impl InternalImpl = OwnableComponent::InternalImpl<ContractState>;
+
+    #[event]
+    #[derive(Drop, starknet::Event)]
+    pub enum Event {
+        QuestionAnswered: QuestionAnswered,
+        ChosenAnswer: ChosenAnswer,
+        #[flat]
+        OwnableEvent: OwnableComponent::Event,
+    }
 
     #[storage]
     struct Storage {
@@ -37,14 +49,20 @@ pub mod StarkOverflow {
     }
 
     #[abi(embed_v0)]
-    impl StarkOverflow of IStarkOverflow<ContractState> {
-        fn askQuestion(ref self: T, description: ByteArray, value: u256) -> u256 {
+    impl StarkOverflow of super::IStarkOverflow<ContractState> {
+        fn askQuestion(ref self: ContractState, description: ByteArray, value: u256) -> u256 {
             let caller = get_caller_address();
-            let question = Question { id: questionId, author: caller, description, value, status: QuestionStatus::Open };
+            let question_id = generate_question_id();
+            let _question = Question { id: question_id, author: caller, description, value, status: QuestionStatus::Open };
             
-            self.questions.write(questionId, question);
-            questionid
-        };
+            self.questions.entry(question_id).write(_question);
+            question_id
+        }
+
+        fn getQuestion(ref self: ContractState, question_id: u256) -> Question {
+            let found_question = self.questions.entry(question_id).read();
+            found_question
+        }
     }
 
 }
