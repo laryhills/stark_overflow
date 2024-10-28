@@ -1,20 +1,23 @@
 use starknet::ContractAddress;
 
+#[derive(Drop, Serde, starknet::Store)]
 pub enum QuestionStatus {
     Open,
     Resolved,
 }
 
+#[derive(Drop, Serde, starknet::Store)]
 pub struct Question {
-    id: u256,
-    author: ContractAddress,
-    description: ByteArray,
-    value: u256,
-    status: QuestionStatus,
+    pub id: u256,
+    pub author: ContractAddress,
+    pub description: ByteArray,
+    pub value: u256,
+    pub status: QuestionStatus,
 }
 
+#[derive(Drop, Serde, starknet::Store)]
 pub struct Answer {
-    id: u256,
-    author: ContractAddress,
-    description: ByteArray,
+    pub id: u256,
+    pub author: ContractAddress,
+    pub description: ByteArray,
 }
