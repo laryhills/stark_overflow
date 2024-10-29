@@ -20,4 +20,5 @@ pub struct Answer {
     pub id: u256,
     pub author: ContractAddress,
     pub description: ByteArray,
+    pub question_id: u256,
 }
