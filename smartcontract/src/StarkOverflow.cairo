@@ -4,7 +4,7 @@ use stark_overflow::structs::{Question, Answer, QuestionStatus};
 pub trait IStarkOverflow<T> {
     fn askQuestion(ref self: T, description: ByteArray, value: u256) -> u256;
     fn getQuestion(ref self: T, question_id: u256) -> Question;
-    // fn addFundsToQuestion(ref self: T, questionId: u256, value: u256);
+    fn addFundsToQuestion(ref self: T, question_id: u256, value: u256);
     // fn submitAnswer(ref self: T, questionId: u256, answer: ByteArray);
     // fn markAnswerAsCorrect(ref self: T, questionId: u256, answerId: u256);
     // fn withdrawFunds(ref self: T, amount: u256);
@@ -62,6 +62,13 @@ pub mod StarkOverflow {
         fn getQuestion(ref self: ContractState, question_id: u256) -> Question {
             let found_question = self.questions.entry(question_id).read();
             found_question
+        }
+
+        fn addFundsToQuestion(ref self: ContractState, question_id: u256, value: u256) {
+            let mut found_question = self.questions.entry(question_id).read();
+            found_question.value += value;
+
+            self.questions.entry(question_id).write(found_question);
         }
     }
 
