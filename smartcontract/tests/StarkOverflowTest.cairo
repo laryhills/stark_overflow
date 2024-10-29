@@ -39,3 +39,29 @@ fn it_should_be_able_to_add_funds_to_a_question() {
     let question = dispatcher.getQuestion(question_id);
     assert_eq!(question.value, value + additionally_funds);
 }
+
+#[test]
+fn it_should_be_able_to_give_an_answer() {
+    let caller = contract_address_const::<'caller'>();
+    let answer_author = contract_address_const::<'answer'>();
+
+    let (dispatcher, contract_address) = deployStarkOverflowContract(caller);
+    
+    let question_description = "Question of test.";
+    let value = 100;
+    let question_id = dispatcher.askQuestion(question_description.clone(), value);
+
+    start_cheat_caller_address(contract_address, answer_author);
+
+    let answer_description = "Answer of test.";
+
+    let answer_id = dispatcher.submitAnswer(question_id, answer_description.clone());
+    let found_answer = dispatcher.getAnswer(answer_id);
+
+    assert_eq!(found_answer.id, answer_id);
+    assert_eq!(found_answer.author, answer_author);
+    assert_eq!(found_answer.description, answer_description);
+    assert_eq!(found_answer.question_id, question_id);
+
+    stop_cheat_caller_address(contract_address);
+}
