@@ -5,7 +5,8 @@ pub trait IStarkOverflow<T> {
     fn askQuestion(ref self: T, description: ByteArray, value: u256) -> u256;
     fn getQuestion(ref self: T, question_id: u256) -> Question;
     fn addFundsToQuestion(ref self: T, question_id: u256, value: u256);
-    // fn submitAnswer(ref self: T, questionId: u256, answer: ByteArray);
+    fn submitAnswer(ref self: T, question_id: u256, description: ByteArray) -> u256;
+    fn getAnswer(ref self: T, answer_id: u256) -> Answer;
     // fn markAnswerAsCorrect(ref self: T, questionId: u256, answerId: u256);
     // fn withdrawFunds(ref self: T, amount: u256);
 }
@@ -14,7 +15,7 @@ pub trait IStarkOverflow<T> {
 pub mod StarkOverflow {
     use super::{Question, Answer, QuestionStatus};
     use stark_overflow::events::{QuestionAnswered, ChosenAnswer};
-    use stark_overflow::utils::{generate_question_id};
+    use stark_overflow::utils::{generate_question_id, generate_answer_id};
     use openzeppelin_access::ownable::OwnableComponent;
     use starknet::{get_caller_address, ContractAddress};
     use starknet::storage::{StoragePointerReadAccess, StoragePointerWriteAccess, StoragePathEntry, Map};
@@ -69,6 +70,21 @@ pub mod StarkOverflow {
             found_question.value += value;
 
             self.questions.entry(question_id).write(found_question);
+        }
+
+        fn submitAnswer(ref self: ContractState, question_id: u256, description: ByteArray) -> u256 {
+            let caller = get_caller_address();
+            let answer_id = generate_answer_id();
+            let answer = Answer { id: answer_id, author: caller, description, question_id };
+
+            self.answers.entry(answer_id).write(answer);
+
+            answer_id
+        }
+
+        fn getAnswer(ref self: ContractState, answer_id: u256) -> Answer {
+            let found_answer = self.answers.entry(answer_id).read();
+            found_answer
         }
     }
 
