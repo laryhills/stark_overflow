@@ -7,7 +7,8 @@ pub trait IStarkOverflow<T> {
     fn addFundsToQuestion(ref self: T, question_id: u256, value: u256);
     fn submitAnswer(ref self: T, question_id: u256, description: ByteArray) -> u256;
     fn getAnswer(ref self: T, answer_id: u256) -> Answer;
-    // fn markAnswerAsCorrect(ref self: T, questionId: u256, answerId: u256);
+    fn markAnswerAsCorrect(ref self: T, question_id: u256, answer_id: u256);
+    fn getCorrectAnswer(ref self: T, question_id: u256) -> u256;
     // fn withdrawFunds(ref self: T, amount: u256);
 }
 
@@ -85,6 +86,23 @@ pub mod StarkOverflow {
         fn getAnswer(ref self: ContractState, answer_id: u256) -> Answer {
             let found_answer = self.answers.entry(answer_id).read();
             found_answer
+        }
+
+        fn markAnswerAsCorrect(ref self: ContractState, question_id: u256, answer_id: u256) {
+            let caller = get_caller_address();
+            let question_author = self.getQuestion(question_id).author;
+
+            assert!(caller == question_author, "Only the author of the question can mark the answer as correct");
+
+            let found_answer = self.getAnswer(answer_id);
+            assert!(found_answer.question_id == question_id, "The specified answer does not exist for this question");
+
+            self.questionIdAnswerId.entry(question_id).write(answer_id);
+        }
+
+        fn getCorrectAnswer(ref self: ContractState, question_id: u256) -> u256 {
+            let found_corret_answer_id = self.questionIdAnswerId.entry(question_id).read();
+            found_corret_answer_id
         }
     }
 
