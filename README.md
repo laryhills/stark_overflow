@@ -1,110 +1,110 @@
 # Stark Overflow
 
-**Stark Overflow** é uma aplicação descentralizada (dApp) inspirada no conceito do Stack Overflow, porém com um sistema de incentivos financeiros. Utilizando a tecnologia da Starknet, este projeto permite que usuários façam perguntas e ofereçam recompensas financeiras em criptomoedas para quem fornecer as melhores respostas.
+**Stark Overflow** is a decentralized application (dApp) inspired by the concept of Stack Overflow, but with a financial incentive system. Using Starknet technology, this project allows users to ask questions and offer cryptocurrency rewards for the best answers.
 
-## 🚀 Funcionalidades
+## 🚀 Features
 
-- Sistema de perguntas e respostas gamificado.
-- Depósito de criptomoedas atrelado a cada pergunta.
-- Contribuição adicional por outros usuários para aumentar a recompensa.
-- Pagamento automático para a resposta escolhida como solução.
-- Frontend construído com **React** e **Typescript**.
-- Smart Contracts escritos em **Cairo** para execução na Starknet.
+- Gamified question-and-answer system.
+- Cryptocurrency deposits linked to each question.
+- Additional contributions from other users to increase the reward.
+- Automatic payment for the answer selected as the solution.
+- Frontend built with **React** and **Typescript**.
+- Smart Contracts written in **Cairo** for execution on Starknet.
 
-## 📂 Estrutura do Projeto
+## 📂 Project Structure
 
 ```
 /stark_overflow
 │
-├── frontend/              # Interface do usuário em React
-│   └── README.md          # Instruções específicas do frontend
+├── frontend/              # User interface in React
+│   └── README.md          # Specific frontend instructions
 │
-├── smartcontract/         # Smart contracts escritos em Cairo
-│   ├── src/               # Códigos-fonte dos contratos
+├── smartcontract/         # Smart contracts written in Cairo
+│   ├── src/               # Contract source code
 │   │   ├── events.cairo
 │   │   ├── lib.cairo
 │   │   ├── StarkOverflow.cairo
 │   │   ├── structs.cairo
 │   │   └── utils.cairo
-│   ├── tests/             # Testes para os contratos
-│   └── Scarb.toml         # Configuração do projeto Scarb
+│   ├── tests/             # Contract tests
+│   └── Scarb.toml         # Scarb project configuration
 │
-└── README.md              # Documentação geral do projeto
+└── README.md              # General project documentation
 ```
 
-## ⚙️ Instalação
+## ⚙️ Installation
 
-### Pré-requisitos
+### Prerequisites
 
 - [Node.js](https://nodejs.org/) v16+
-- [Yarn](https://yarnpkg.com/) ou [npm](https://www.npmjs.com/)
-- [Scarb](https://docs.swmansion.com/scarb/) (para trabalhar com contratos em Cairo)
+- [Yarn](https://yarnpkg.com/) or [npm](https://www.npmjs.com/)
+- [Scarb](https://docs.swmansion.com/scarb/) (for working with Cairo contracts)
 - [Starknet CLI](https://book.starknet.io/)
 
-### 1. Clone o repositório
+### 1. Clone the repository
 ```bash
- git clone https://github.com/seu-usuario/stark-overflow.git
+ git clone https://github.com/your-username/stark-overflow.git
  cd stark-overflow
 ```
 
-### 2. Configuração do Frontend
+### 2. Frontend Setup
 ```bash
 cd frontend
 npm install
-# ou
+# or
 yarn install
 ```
 
-### 3. Configuração dos Smart Contracts
+### 3. Smart Contracts Setup
 ```bash
 cd smartcontract
 scarb build
 ```
 
-## 🔍 Como Usar
+## 🔍 How to Use
 
-### Iniciando o Frontend
+### Starting the Frontend
 ```bash
 cd frontend
 npm start
-# ou
+# or
 yarn start
 ```
 
-### Executando Testes dos Smart Contracts
+### Running Smart Contract Tests
 ```bash
 cd smartcontract
 scarb test
 ```
 
-### Implantação dos Contratos
-Certifique-se de estar autenticado na Starknet:
+### Deploying Contracts
+Make sure you are authenticated on Starknet:
 ```bash
 starknet deploy --contract target/dev/stark_overflow_tests_StarkOverflow.test.contract_class.json
 ```
 
-## 🛠️ Tecnologias Utilizadas
+## 🛠️ Technologies Used
 
 - **React.js**
 - **Typescript**
 - **Styled-Components**
-- **Cairo** (Linguagem da Starknet)
-- **Scarb** (Gerenciador de pacotes para projetos Cairo)
+- **Cairo** (Starknet Language)
+- **Scarb** (Package manager for Cairo projects)
 
-## 🤝 Contribuição
+## 🤝 Contribution
 
-1. Fork o projeto
-2. Crie uma branch (`git checkout -b feature/MinhaFeature`)
-3. Commit suas alterações (`git commit -m 'Adiciona minha feature'`)
-4. Push para a branch (`git push origin feature/MinhaFeature`)
-5. Abra um Pull Request
+1. Fork the project
+2. Create a branch (`git checkout -b feature/MyFeature`)
+3. Commit your changes (`git commit -m 'Add my feature'`)
+4. Push to the branch (`git push origin feature/MyFeature`)
+5. Open a Pull Request
 
-## 📜 Licença
+## 📜 License
 
-Este projeto está licenciado sob a [MIT License](LICENSE).
+This project is licensed under the [MIT License](LICENSE).
 
-## 📧 Contato
+## 📧 Contact
 
 Müller Esposito Nunes  
-[LinkedIn](https://linkedin.com/in/mulleresposito) | [E-mail](mailto:mulleresposito@hotmail.com)
+[LinkedIn](https://linkedin.com/in/mulleresposito) | [Email](mailto:mulleresposito@hotmail.com)
 
