@@ -17,7 +17,7 @@ pub mod StarkOverflow {
     use super::{Question, Answer, QuestionStatus};
     use stark_overflow::events::{QuestionAnswered, ChosenAnswer};
     use stark_overflow::utils::{generate_question_id, generate_answer_id};
-    use openzeppelin_access::ownable::OwnableComponent;
+    use openzeppelin::access::ownable::OwnableComponent;
     use starknet::{get_caller_address, ContractAddress};
     use starknet::storage::{StoragePointerReadAccess, StoragePointerWriteAccess, StoragePathEntry, Map};
 

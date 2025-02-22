@@ -2,6 +2,7 @@ use starknet::ContractAddress;
 
 #[derive(Drop, Serde, starknet::Store)]
 pub enum QuestionStatus {
+    #[default]
     Open,
     Resolved,
 }
