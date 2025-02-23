@@ -69,27 +69,22 @@ fn it_should_be_able_to_give_an_answer() {
 #[test]
 fn it_should_be_able_to_mark_answer_as_correct() {
     let caller = contract_address_const::<'caller'>();
-    let answer_author = contract_address_const::<'answer_author'>();
     let question_author = contract_address_const::<'question_author'>();
+    let answer_author = contract_address_const::<'answer_author'>();
 
     let (dispatcher, contract_address) = deployStarkOverflowContract(caller);
     let safe_dispatcher = IStarkOverflowSafeDispatcher { contract_address: contract_address };
 
     start_cheat_caller_address(contract_address, question_author);
-
-    let question_description = "Question for marking correct answer test.";
+    let question_description = "Question of test marking answer as correct.";
     let question_value = 100;
     let question_id = safe_dispatcher.askQuestion(question_description.clone(), question_value).unwrap();
 
     start_cheat_caller_address(contract_address, answer_author);
-
     let answer_description = "This is a test answer.";
     let answer_id = safe_dispatcher.submitAnswer(question_id, answer_description.clone()).unwrap();
 
-    // Parando o cheat e alterando o chamador para o autor da pergunta para marcar a resposta como correta
-    stop_cheat_caller_address(contract_address);        
-
-    // Tentando marcar uma resposta com um usuário que não é o autor da pergunta e verificando erro
+    // Trying to tag an answer with a user who is not the author of the question and getting an error
     let other_user = contract_address_const::<'other_user'>();
     start_cheat_caller_address(contract_address, other_user);
     match safe_dispatcher.markAnswerAsCorrect(question_id, answer_id) {
@@ -100,7 +95,7 @@ fn it_should_be_able_to_mark_answer_as_correct() {
         }
     };
 
-    // Testando erro: tenta marcar uma resposta inexistente como correta
+    // Testing error: tries to mark a non-existent answer as correct
     let invalid_answer_id = 999;
     start_cheat_caller_address(contract_address, question_author);
     match safe_dispatcher.markAnswerAsCorrect(question_id, invalid_answer_id) {
@@ -115,6 +110,37 @@ fn it_should_be_able_to_mark_answer_as_correct() {
 
     let correct_answer_id = dispatcher.getCorrectAnswer(question_id);
     assert_eq!(correct_answer_id, answer_id);
+
+    stop_cheat_caller_address(contract_address);
+}
+
+#[test]
+fn it_should_transfer_funds_to_correct_answer_author() {
+    let caller = contract_address_const::<'caller'>();
+    let question_author = contract_address_const::<'question_author'>();
+    let answer_author = contract_address_const::<'answer_author'>();
+
+    let (dispatcher, contract_address) = deployStarkOverflowContract(caller);
+    let safe_dispatcher = IStarkOverflowSafeDispatcher { contract_address: contract_address };
+
+    start_cheat_caller_address(contract_address, question_author);
+    let question_description = "Question of test fund transfer.";
+    let question_value = 100;
+    let question_id = safe_dispatcher.askQuestion(question_description.clone(), question_value).unwrap();
+
+    start_cheat_caller_address(contract_address, answer_author);
+    let answer_description = "This is a test answer for fund transfer.";
+    let answer_id = safe_dispatcher.submitAnswer(question_id, answer_description.clone()).unwrap();
+
+    start_cheat_caller_address(contract_address, question_author);
+    dispatcher.markAnswerAsCorrect(question_id, answer_id);
+
+    // Assuming there is a function to get the balance of an address
+    let initial_balance = dispatcher.getBalance(answer_author);
+    dispatcher.transferFundsToCorrectAnswerAuthor(question_id);
+    let final_balance = dispatcher.getBalance(answer_author);
+
+    assert_eq!(final_balance, initial_balance + question_value);
 
     stop_cheat_caller_address(contract_address);
 }

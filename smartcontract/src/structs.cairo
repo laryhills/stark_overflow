@@ -1,6 +1,6 @@
 use starknet::ContractAddress;
 
-#[derive(Drop, Serde, starknet::Store)]
+#[derive(Drop, Serde, PartialEq, starknet::Store)]
 pub enum QuestionStatus {
     #[default]
     Open,
