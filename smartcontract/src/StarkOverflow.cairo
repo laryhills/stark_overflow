@@ -12,7 +12,6 @@ pub trait IStarkOverflow<T> {
     fn getCorrectAnswer(self: @T, question_id: u256) -> u256;
 
     // Getters
-    fn stark_token_dispatcher(self: @T) -> IERC20CamelDispatcher;
     // fn withdrawFunds(ref self: T, amount: u256);
 }
 
@@ -21,11 +20,11 @@ pub mod StarkOverflow {
     use super::IStarkOverflow;
     use super::{Question, Answer, QuestionStatus};
     use super::{IERC20CamelDispatcher, IERC20CamelDispatcherTrait};
+    use starknet::{get_caller_address, ContractAddress, get_contract_address};
+    use starknet::storage::{StoragePointerReadAccess, StoragePointerWriteAccess, StoragePathEntry, Map};
     use openzeppelin::access::ownable::OwnableComponent;
     use stark_overflow::events::{QuestionAnswered, ChosenAnswer};
     use stark_overflow::utils::{generate_question_id, generate_answer_id};
-    use starknet::{get_caller_address, ContractAddress};
-    use starknet::storage::{StoragePointerReadAccess, StoragePointerWriteAccess, StoragePathEntry, Map};
 
     component!(path: OwnableComponent, storage: ownable, event: OwnableEvent);
 
@@ -55,11 +54,10 @@ pub mod StarkOverflow {
     #[constructor]
     fn constructor(
         ref self: ContractState,
-        eth_contract: ContractAddress,
-        owner: ContractAddress
+        stark_contract_address: ContractAddress,
     ) {
-        self.ownable.initializer(owner);
-        self.stark_token_dispatcher.write(IERC20CamelDispatcher { contract_address: eth_contract});
+        self.ownable.initializer(get_contract_address());
+        self.stark_token_dispatcher.write(IERC20CamelDispatcher { contract_address: stark_contract_address});
     }
 
     #[abi(embed_v0)]
@@ -68,7 +66,7 @@ pub mod StarkOverflow {
             let caller = get_caller_address();
             let question_id = generate_question_id();
             let _question = Question { id: question_id, author: caller, description, value, status: QuestionStatus::Open };
-            self.stark_token_dispatcher().transferFrom(caller, self.ownable.owner(), value);
+            self._stark_token_dispatcher().transferFrom(caller, self.ownable.owner(), value);
             
             self.questions.entry(question_id).write(_question);
             question_id
@@ -82,7 +80,7 @@ pub mod StarkOverflow {
         fn addFundsToQuestion(ref self: ContractState, question_id: u256, value: u256) {
             let mut found_question = self.questions.entry(question_id).read();
             found_question.value += value;
-            self.stark_token_dispatcher().transferFrom(get_caller_address(), self.ownable.owner(), value);
+            self._stark_token_dispatcher().transferFrom(get_caller_address(), self.ownable.owner(), value);
 
             self.questions.entry(question_id).write(found_question);
         }
@@ -114,9 +112,10 @@ pub mod StarkOverflow {
             let found_question = self.questions.entry(question_id).read();
             assert!(found_question.status == QuestionStatus::Open, "The question is already resolved");
 
-            self.stark_token_dispatcher().transferFrom(self.ownable.owner(), found_answer.author, found_question.value);
             self.questions.entry(question_id).write(Question { status: QuestionStatus::Resolved, ..found_question });
             self.questionIdAnswerId.entry(question_id).write(answer_id);
+
+            self._transferFundsToCorrectAnswerAuthor(question_id);
         }
 
         fn getCorrectAnswer(self: @ContractState, question_id: u256) -> u256 {
@@ -124,9 +123,21 @@ pub mod StarkOverflow {
             found_corret_answer_id
         }
 
-        fn stark_token_dispatcher(self: @ContractState) -> IERC20CamelDispatcher {
+    }
+    
+    #[generate_trait]
+    impl InternalFunctions of InternalFunctionsTrati {
+        fn _transferFundsToCorrectAnswerAuthor(ref self: ContractState, question_id: u256) {
+            let question = self.getQuestion(question_id);
+            assert!(question.status == QuestionStatus::Resolved, "The question is not resolved yet");
+            
+            let correct_answer_id = self.getCorrectAnswer(question_id);
+            let correct_answer = self.getAnswer(correct_answer_id);
+            self._stark_token_dispatcher().transferFrom(self.ownable.owner(), correct_answer.author, question.value);
+        }        
+        
+        fn _stark_token_dispatcher(self: @ContractState) -> IERC20CamelDispatcher {
             self.stark_token_dispatcher.read()
         }
     }
-
 }
