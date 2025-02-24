@@ -2,13 +2,14 @@ use snforge_std::{CheatSpan, cheat_caller_address};
 use starknet::get_caller_address;
 use super::common::{deployStarkOverflowContract, deploy_mock_stark_token, ADDRESSES, ADDRESSESTrait, approve_as_spender, EIGHTEEN_DECIMALS};
 use stark_overflow::StarkOverflow::{IStarkOverflowDispatcherTrait};
-use openzeppelin::token::erc20::interface::{IERC20CamelDispatcher, IERC20CamelDispatcherTrait};
+use stark_overflow::mock_contracts::MockSTARKToken::{IERC20Dispatcher, IERC20DispatcherTrait};
+
 
 #[test]
 fn test_deploy_mock_stark_token() {
     let INITIAL_BALANCE: u256 = 100_000_000_000_000_000_000; // 100_STARK
     let (_, contract_address) = deploy_mock_stark_token();
-    let stark_token_dispatcher = IERC20CamelDispatcher { contract_address };
+    let stark_token_dispatcher = IERC20Dispatcher { contract_address };
     println!("Contract address: {:?}", contract_address);
 
     let balance = stark_token_dispatcher.balanceOf(ADDRESSES::ASKER.get());
@@ -54,7 +55,6 @@ fn it_should_be_able_to_ask_a_question() {
 }
 
 #[test]
-#[ignore]
 fn it_should_be_able_to_add_funds_to_a_question() {
     let asker = ADDRESSES::ASKER.get();
     let sponsor = ADDRESSES::SPONSOR.get();
@@ -65,15 +65,21 @@ fn it_should_be_able_to_add_funds_to_a_question() {
     let value = 50 + EIGHTEEN_DECIMALS; // 50 STARK
 
     approve_as_spender(asker, starkoverflow_contract_address, stark_contract_dispatcher, value);
+    cheat_caller_address(starkoverflow_contract_address, asker, CheatSpan::TargetCalls(1));
     let question_id = starkoverflow_dispatcher.askQuestion(description.clone(), value);
 
-    // stark_contract_dispatcher.mint(sponsor, 100 + EIGHTEEN_DECIMALS); // 100 STARK
+    stark_contract_dispatcher.mint(sponsor, 100 + EIGHTEEN_DECIMALS); // 100 STARK
     let additionally_funds = 50;
+    
     approve_as_spender(sponsor, starkoverflow_contract_address, stark_contract_dispatcher, additionally_funds);
+    cheat_caller_address(starkoverflow_contract_address, sponsor, CheatSpan::TargetCalls(1));
     starkoverflow_dispatcher.addFundsToQuestion(question_id, additionally_funds);
 
     let question = starkoverflow_dispatcher.getQuestion(question_id);
     assert_eq!(question.value, value + additionally_funds);
+
+    let final_balance = stark_contract_dispatcher.balanceOf(starkoverflow_contract_address);
+    assert_eq!(final_balance, value + additionally_funds);
 }
 
 // #[test]
