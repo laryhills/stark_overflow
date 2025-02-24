@@ -1,5 +1,5 @@
 use stark_overflow::structs::{Question, Answer, QuestionStatus};
-use openzeppelin::token::erc20::interface::{IERC20CamelDispatcher, IERC20CamelDispatcherTrait};
+use stark_overflow::mock_contracts::MockSTARKToken::{IERC20Dispatcher, IERC20DispatcherTrait};
 
 #[starknet::interface]
 pub trait IStarkOverflow<T> {
@@ -19,7 +19,7 @@ pub trait IStarkOverflow<T> {
 pub mod StarkOverflow {
     use super::IStarkOverflow;
     use super::{Question, Answer, QuestionStatus};
-    use super::{IERC20CamelDispatcher, IERC20CamelDispatcherTrait};
+    use super::{IERC20Dispatcher, IERC20DispatcherTrait};
     use starknet::{get_caller_address, ContractAddress, get_contract_address};
     use starknet::storage::{StoragePointerReadAccess, StoragePointerWriteAccess, StoragePathEntry, Map};
     use openzeppelin::access::ownable::OwnableComponent;
@@ -46,7 +46,7 @@ pub mod StarkOverflow {
         questions: Map<u256, Question>,
         answers: Map<u256, Answer>,
         questionIdAnswerId: Map<u256, u256>,
-        stark_token_dispatcher: IERC20CamelDispatcher,
+        stark_token_dispatcher: IERC20Dispatcher,
         #[substorage(v0)]
         ownable: OwnableComponent::Storage,
     }
@@ -57,7 +57,7 @@ pub mod StarkOverflow {
         stark_contract_address: ContractAddress,
     ) {
         self.ownable.initializer(get_contract_address());
-        self.stark_token_dispatcher.write(IERC20CamelDispatcher { contract_address: stark_contract_address});
+        self.stark_token_dispatcher.write(IERC20Dispatcher { contract_address: stark_contract_address});
     }
 
     #[abi(embed_v0)]
@@ -136,7 +136,7 @@ pub mod StarkOverflow {
             self._stark_token_dispatcher().transferFrom(self.ownable.owner(), correct_answer.author, question.value);
         }        
         
-        fn _stark_token_dispatcher(self: @ContractState) -> IERC20CamelDispatcher {
+        fn _stark_token_dispatcher(self: @ContractState) -> IERC20Dispatcher {
             self.stark_token_dispatcher.read()
         }
     }

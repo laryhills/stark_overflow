@@ -6,7 +6,7 @@ use stark_overflow::mock_contracts::MockSTARKToken::{IERC20Dispatcher, IERC20Dis
 
 pub const EIGHTEEN_DECIMALS: u256 = 1_000_000_000_000_000_000;
 
-pub fn deployStarkOverflowContract(stark_contract_address: ContractAddress) -> (IStarkOverflowDispatcher, ContractAddress, IERC20Dispatcher) {
+pub fn deployStarkOverflowContract() -> (IStarkOverflowDispatcher, ContractAddress, IERC20Dispatcher) {
     let (stark_token_dispatcher, stark_contract_address) = deploy_mock_stark_token();
     let declared_contract = declare("StarkOverflow").unwrap();
     let contract_class = declared_contract.contract_class();
@@ -49,10 +49,10 @@ pub fn deploy_mock_stark_token() -> (IERC20Dispatcher, ContractAddress) {
     calldata.append_serde(INITIAL_SUPPLY);
     calldata.append_serde(ADDRESSES::ASKER.get());
     let (stark_contract_address, _) = erc20_class_hash.deploy(@calldata).unwrap();
-    let dispatcher = IERC20Dispatcher { contract_address: stark_contract_address };
+    let stark_contract_dispatcher = IERC20Dispatcher { contract_address: stark_contract_address };
     println!("-- Deployed Mock Stark Token contract on: {:?}", stark_contract_address);
 
-    (dispatcher, stark_contract_address)
+    (stark_contract_dispatcher, stark_contract_address)
 }
 
 pub fn approve_as_spender(owner: ContractAddress, spender: ContractAddress, stark_contract_dispatcher: IERC20Dispatcher, value: u256) {

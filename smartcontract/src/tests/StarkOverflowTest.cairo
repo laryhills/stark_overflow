@@ -24,7 +24,7 @@ fn test_deploy_mock_stark_token() {
 fn it_should_be_able_to_ask_a_question() {
     let asker = ADDRESSES::ASKER.get();
  
-    let (starkoverflow_dispatcher, starkoverflow_contract_address, stark_contract_dispatcher) = deployStarkOverflowContract(asker);
+    let (starkoverflow_dispatcher, starkoverflow_contract_address, stark_contract_dispatcher) = deployStarkOverflowContract();
 
     let starting_balance = stark_contract_dispatcher.balanceOf(starkoverflow_contract_address);
     let asker_starting_balance = stark_contract_dispatcher.balanceOf(asker);
@@ -59,7 +59,7 @@ fn it_should_be_able_to_add_funds_to_a_question() {
     let asker = ADDRESSES::ASKER.get();
     let sponsor = ADDRESSES::SPONSOR.get();
 
-    let (starkoverflow_dispatcher, starkoverflow_contract_address, stark_contract_dispatcher) = deployStarkOverflowContract(asker);
+    let (starkoverflow_dispatcher, starkoverflow_contract_address, stark_contract_dispatcher) = deployStarkOverflowContract();
     
     let description = "Question of test.";
     let value = 50 + EIGHTEEN_DECIMALS; // 50 STARK
