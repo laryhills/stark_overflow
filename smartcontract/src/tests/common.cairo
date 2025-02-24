@@ -8,19 +8,19 @@ pub const EIGHTEEN_DECIMALS: u256 = 1_000_000_000_000_000_000;
 
 pub fn deployStarkOverflowContract() -> (IStarkOverflowDispatcher, ContractAddress, IERC20Dispatcher) {
     let (stark_token_dispatcher, stark_contract_address) = deploy_mock_stark_token();
-    let declared_contract = declare("StarkOverflow").unwrap();
-    let contract_class = declared_contract.contract_class();
+    let declared_starkoverflow_contract = declare("StarkOverflow").unwrap();
+    let starkoverflow_contract_class = declared_starkoverflow_contract.contract_class();
     
     let mut constructor_calldata: Array<felt252> = array![];
     constructor_calldata.append_serde(stark_contract_address);
     
     println!("-- Deploying Stark Overflow contract...");
-    let (contract_address, _) = contract_class.deploy(@constructor_calldata).unwrap();
-    let starkoverflow_dispatcher = IStarkOverflowDispatcher { contract_address };
+    let (starkoverflow_contract_address, _) = starkoverflow_contract_class.deploy(@constructor_calldata).unwrap();
+    let starkoverflow_dispatcher = IStarkOverflowDispatcher { contract_address: starkoverflow_contract_address };
     
-    println!("-- Stark Overflow contract deployed on: {:?}", contract_address);
+    println!("-- Stark Overflow contract deployed on: {:?}", starkoverflow_contract_address);
     
-    (starkoverflow_dispatcher, contract_address, stark_token_dispatcher)
+    (starkoverflow_dispatcher, starkoverflow_contract_address, stark_token_dispatcher)
 }
 
 #[derive(Copy, Clone, Drop)]

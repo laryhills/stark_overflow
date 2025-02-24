@@ -24,20 +24,20 @@ fn test_deploy_mock_stark_token() {
 fn it_should_be_able_to_ask_a_question() {
     let asker = ADDRESSES::ASKER.get();
  
-    let (starkoverflow_dispatcher, starkoverflow_contract_address, stark_contract_dispatcher) = deployStarkOverflowContract();
+    let (starkoverflow_dispatcher, starkoverflow_contract_address, stark_token_dispatcher) = deployStarkOverflowContract();
 
-    let starting_balance = stark_contract_dispatcher.balanceOf(starkoverflow_contract_address);
-    let asker_starting_balance = stark_contract_dispatcher.balanceOf(asker);
+    let starting_balance = stark_token_dispatcher.balanceOf(starkoverflow_contract_address);
+    let asker_starting_balance = stark_token_dispatcher.balanceOf(asker);
     println!("-- Asker address: {:?}", asker);
     println!("-- Asker starting balance: {:?} STARK", asker_starting_balance / EIGHTEEN_DECIMALS);
     println!("-- Stark Overflow contract address: {:?}", starkoverflow_contract_address);
     println!("-- Stark Overflow starting balance: {:?} STARK", starting_balance);
-    println!("-- Stark Token contract address: {:?}", stark_contract_dispatcher.contract_address);
+    println!("-- Stark Token contract address: {:?}", stark_token_dispatcher.contract_address);
     
     let description = "Question of test.";
     let value: u256 = 1 + EIGHTEEN_DECIMALS; // 1 STARK
     
-    approve_as_spender(asker, starkoverflow_contract_address, stark_contract_dispatcher, value);
+    approve_as_spender(asker, starkoverflow_contract_address, stark_token_dispatcher, value);
     
     cheat_caller_address(starkoverflow_contract_address, asker, CheatSpan::TargetCalls(1));
     println!("Caller ({:?}) -- Asking a question...", get_caller_address());
@@ -49,7 +49,7 @@ fn it_should_be_able_to_ask_a_question() {
     assert_eq!(question.description, description);
     assert_eq!(question.value, value);
 
-    let final_balance = stark_contract_dispatcher.balanceOf(starkoverflow_contract_address);
+    let final_balance = stark_token_dispatcher.balanceOf(starkoverflow_contract_address);
     println!("-- Final balance in Stark Overflow contract: {:?} STARK", final_balance / EIGHTEEN_DECIMALS);
     assert_eq!(final_balance, starting_balance + value);
 }
@@ -59,54 +59,53 @@ fn it_should_be_able_to_add_funds_to_a_question() {
     let asker = ADDRESSES::ASKER.get();
     let sponsor = ADDRESSES::SPONSOR.get();
 
-    let (starkoverflow_dispatcher, starkoverflow_contract_address, stark_contract_dispatcher) = deployStarkOverflowContract();
+    let (starkoverflow_dispatcher, starkoverflow_contract_address, stark_token_dispatcher) = deployStarkOverflowContract();
     
     let description = "Question of test.";
     let value = 50 + EIGHTEEN_DECIMALS; // 50 STARK
 
-    approve_as_spender(asker, starkoverflow_contract_address, stark_contract_dispatcher, value);
+    approve_as_spender(asker, starkoverflow_contract_address, stark_token_dispatcher, value);
     cheat_caller_address(starkoverflow_contract_address, asker, CheatSpan::TargetCalls(1));
     let question_id = starkoverflow_dispatcher.askQuestion(description.clone(), value);
 
-    stark_contract_dispatcher.mint(sponsor, 100 + EIGHTEEN_DECIMALS); // 100 STARK
+    stark_token_dispatcher.mint(sponsor, 100 + EIGHTEEN_DECIMALS); // 100 STARK
     let additionally_funds = 50;
     
-    approve_as_spender(sponsor, starkoverflow_contract_address, stark_contract_dispatcher, additionally_funds);
+    approve_as_spender(sponsor, starkoverflow_contract_address, stark_token_dispatcher, additionally_funds);
     cheat_caller_address(starkoverflow_contract_address, sponsor, CheatSpan::TargetCalls(1));
     starkoverflow_dispatcher.addFundsToQuestion(question_id, additionally_funds);
 
     let question = starkoverflow_dispatcher.getQuestion(question_id);
     assert_eq!(question.value, value + additionally_funds);
 
-    let final_balance = stark_contract_dispatcher.balanceOf(starkoverflow_contract_address);
+    let final_balance = stark_token_dispatcher.balanceOf(starkoverflow_contract_address);
     assert_eq!(final_balance, value + additionally_funds);
 }
 
-// #[test]
-// fn it_should_be_able_to_give_an_answer() {
-//     let caller = contract_address_const::<'caller'>();
-//     let answer_author = contract_address_const::<'answer'>();
+#[test]
+fn it_should_be_able_to_give_an_answer() {
+    let asker = ADDRESSES::ASKER.get();
+    let responder = ADDRESSES::RESPONDER.get();
 
-//     let (starkoverflow_dispatcher, contract_address, _) = deployStarkOverflowContract(caller);
+    let (starkoverflow_dispatcher, starkoverflow_contract_address, stark_token_dispatcher) = deployStarkOverflowContract();
     
-//     let question_description = "Question of test.";
-//     let value = 100;
-//     let question_id = starkoverflow_dispatcher.askQuestion(question_description.clone(), value);
+    let question_description = "Question of test.";
+    let value = 100;
 
-//     start_cheat_caller_address(contract_address, answer_author);
+    approve_as_spender(asker, starkoverflow_contract_address, stark_token_dispatcher, value);    
+    cheat_caller_address(starkoverflow_contract_address, asker, CheatSpan::TargetCalls(1));
+    let question_id = starkoverflow_dispatcher.askQuestion(question_description.clone(), value);
 
-//     let answer_description = "Answer of test.";
+    cheat_caller_address(starkoverflow_contract_address, responder, CheatSpan::TargetCalls(1));
+    let answer_description = "Answer of test.";
+    let answer_id = starkoverflow_dispatcher.submitAnswer(question_id, answer_description.clone());
+    let found_answer = starkoverflow_dispatcher.getAnswer(answer_id);
 
-//     let answer_id = starkoverflow_dispatcher.submitAnswer(question_id, answer_description.clone());
-//     let found_answer = starkoverflow_dispatcher.getAnswer(answer_id);
-
-//     assert_eq!(found_answer.id, answer_id);
-//     assert_eq!(found_answer.author, answer_author);
-//     assert_eq!(found_answer.description, answer_description);
-//     assert_eq!(found_answer.question_id, question_id);
-
-//     stop_cheat_caller_address(contract_address);
-// }
+    assert_eq!(found_answer.id, answer_id);
+    assert_eq!(found_answer.author, responder);
+    assert_eq!(found_answer.description, answer_description);
+    assert_eq!(found_answer.question_id, question_id);
+}
 
 // #[test]
 // fn it_should_be_able_to_mark_answer_as_correct() {
