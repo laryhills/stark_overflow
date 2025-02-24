@@ -1,26 +1,36 @@
+use starknet::ContractAddress;
+
+#[starknet::interface]
+pub trait IERC20<TContractState> {
+    fn name(self: @TContractState) -> felt252;
+    fn symbol(self: @TContractState) -> felt252;
+    fn decimals(self: @TContractState) -> u8;
+    fn total_supply(self: @TContractState) -> u256;
+    fn balanceOf(self: @TContractState, account: ContractAddress) -> u256;
+    fn allowance(self: @TContractState, owner: ContractAddress, spender: ContractAddress) -> u256;
+    fn transfer(ref self: TContractState, recipient: ContractAddress, amount: u256) -> bool;
+    fn transfer_from(
+        ref self: TContractState, sender: ContractAddress, recipient: ContractAddress, amount: u256
+    ) -> bool;
+    fn approve(ref self: TContractState, spender: ContractAddress, amount: u256) -> bool;
+    fn mint(ref self: TContractState, receiver: starknet::ContractAddress, amount: u256);
+}
+
 #[starknet::contract]
 pub mod MockSTARKToken {
-    use openzeppelin::access::ownable::OwnableComponent;
     use openzeppelin::token::erc20::{ERC20Component, ERC20HooksEmptyImpl};
     use starknet::ContractAddress;
 
     component!(path: ERC20Component, storage: erc20, event: ERC20Event);
-    component!(path: OwnableComponent, storage: ownable, event: OwnableEvent);
 
     #[abi(embed_v0)]
     impl ERC20Impl = ERC20Component::ERC20MixinImpl<ContractState>;
-    #[abi(embed_v0)]
-    impl OwnableMixinImpl = OwnableComponent::OwnableMixinImpl<ContractState>;
-    
     impl ERC20InternalImpl = ERC20Component::InternalImpl<ContractState>;
-    impl OwnableInternalImpl = OwnableComponent::InternalImpl<ContractState>;
-    
+
     #[storage]
     struct Storage {
         #[substorage(v0)]
         erc20: ERC20Component::Storage,
-        #[substorage(v0)]
-        ownable: OwnableComponent::Storage,
     }
 
     #[event]
@@ -28,8 +38,6 @@ pub mod MockSTARKToken {
     enum Event {
         #[flat]
         ERC20Event: ERC20Component::Event,
-        #[flat]
-        OwnableEvent: OwnableComponent::Event,
     }
 
     #[constructor]
@@ -40,14 +48,11 @@ pub mod MockSTARKToken {
         self.erc20.initializer(name, symbol);
         self.erc20.mint(recipient, initial_supply);
     }
-
-    #[generate_trait]
-    #[abi(per_item)]
-    pub impl ExternalImpl of ExternalTrait {
-        #[external(v0)]
-        fn mint(ref self: ContractState, recipient: ContractAddress, amount: u256) {
-            self.ownable.assert_only_owner();
-            self.erc20.mint(recipient, amount);
-        }
+    
+    #[external(v0)]
+    fn mint(ref self: ContractState, recipient: ContractAddress, amount: u256) {
+        // self.ownable.assert_only_owner();
+        // ANYONE can mint tokens
+        self.erc20.mint(recipient, amount);
     }
 }

@@ -126,7 +126,7 @@ pub mod StarkOverflow {
     }
     
     #[generate_trait]
-    impl InternalFunctions of InternalFunctionsTrati {
+    impl InternalFunctions of InternalFunctionsTrait {
         fn _transferFundsToCorrectAnswerAuthor(ref self: ContractState, question_id: u256) {
             let question = self.getQuestion(question_id);
             assert!(question.status == QuestionStatus::Resolved, "The question is not resolved yet");
