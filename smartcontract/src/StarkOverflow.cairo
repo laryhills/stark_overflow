@@ -1,24 +1,22 @@
 use stark_overflow::structs::{Question, Answer, QuestionStatus};
+use stark_overflow::types::{QuestionId, AnswerId};
 use stark_overflow::mock_contracts::MockSTARKToken::{IERC20Dispatcher, IERC20DispatcherTrait};
 
 #[starknet::interface]
 pub trait IStarkOverflow<T> {
-    fn askQuestion(ref self: T, description: ByteArray, value: u256) -> u256;
+    fn askQuestion(ref self: T, description: ByteArray, value: u256) -> QuestionId;
     fn getQuestion(self: @T, question_id: u256) -> Question;
     fn addFundsToQuestion(ref self: T, question_id: u256, value: u256);
-    fn submitAnswer(ref self: T, question_id: u256, description: ByteArray) -> u256;
+    fn submitAnswer(ref self: T, question_id: u256, description: ByteArray) -> AnswerId;
     fn getAnswer(self: @T, answer_id: u256) -> Answer;
     fn markAnswerAsCorrect(ref self: T, question_id: u256, answer_id: u256);
-    fn getCorrectAnswer(self: @T, question_id: u256) -> u256;
-
-    // Getters
-    // fn withdrawFunds(ref self: T, amount: u256);
+    fn getCorrectAnswer(self: @T, question_id: u256) -> AnswerId;
 }
 
 #[starknet::contract]
 pub mod StarkOverflow {
     use super::IStarkOverflow;
-    use super::{Question, Answer, QuestionStatus};
+    use super::{Question, Answer, QuestionStatus, QuestionId, AnswerId};
     use super::{IERC20Dispatcher, IERC20DispatcherTrait};
     use starknet::{get_caller_address, ContractAddress, get_contract_address};
     use starknet::storage::{StoragePointerReadAccess, StoragePointerWriteAccess, StoragePathEntry, Map};
@@ -62,7 +60,7 @@ pub mod StarkOverflow {
 
     #[abi(embed_v0)]
     impl StarkOverflow of super::IStarkOverflow<ContractState> {
-        fn askQuestion(ref self: ContractState, description: ByteArray, value: u256) -> u256 {
+        fn askQuestion(ref self: ContractState, description: ByteArray, value: u256) -> QuestionId {
             let caller = get_caller_address();
             let question_id = generate_question_id();
             let _question = Question { id: question_id, author: caller, description, value, status: QuestionStatus::Open };
@@ -85,7 +83,7 @@ pub mod StarkOverflow {
             self.questions.entry(question_id).write(found_question);
         }
 
-        fn submitAnswer(ref self: ContractState, question_id: u256, description: ByteArray) -> u256 {
+        fn submitAnswer(ref self: ContractState, question_id: u256, description: ByteArray) -> AnswerId {
             let caller = get_caller_address();
             let answer_id = generate_answer_id();
             let answer = Answer { id: answer_id, author: caller, description, question_id };
@@ -118,7 +116,7 @@ pub mod StarkOverflow {
             self._transferFundsToCorrectAnswerAuthor(question_id);
         }
 
-        fn getCorrectAnswer(self: @ContractState, question_id: u256) -> u256 {
+        fn getCorrectAnswer(self: @ContractState, question_id: u256) -> AnswerId {
             let found_corret_answer_id = self.questionIdAnswerId.entry(question_id).read();
             found_corret_answer_id
         }

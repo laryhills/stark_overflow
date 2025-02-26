@@ -164,33 +164,3 @@ fn it_should_be_able_to_mark_answer_as_correct() {
     assert_eq!(starkoverflow_contract_balance, 0);
     assert_eq!(responder_balance, question_balance);
 }
-
-// #[test]
-// fn it_should_transfer_funds_to_correct_answer_author() {
-//     let caller = contract_address_const::<'caller'>();
-//     let question_author = contract_address_const::<'question_author'>();
-//     let answer_author = contract_address_const::<'answer_author'>();
-
-//     let (_starkoverflow_dispatcher, starkoverflow_contract_address, stark_token_dispatcher) = deployStarkOverflowContract(caller);
-//     let safe_dispatcher = IStarkOverflowSafeDispatcher { contract_address: starkoverflow_contract_address };
-
-//     start_cheat_caller_address(starkoverflow_contract_address, question_author);
-//     let question_description = "Question of test fund transfer.";
-//     let question_value = 100;
-//     let question_id = safe_dispatcher.askQuestion(question_description.clone(), question_value).unwrap();
-
-//     start_cheat_caller_address(starkoverflow_contract_address, answer_author);
-//     let answer_description = "This is a test answer for fund transfer.";
-//     let answer_id = safe_dispatcher.submitAnswer(question_id, answer_description.clone()).unwrap();
-
-//     start_cheat_caller_address(starkoverflow_contract_address, question_author);
-//     safe_dispatcher.markAnswerAsCorrect(question_id, answer_id).unwrap();
-
-//     // Assuming there is a function to get the balance of an address
-//     let initial_balance = stark_token_dispatcher.balanceOf(answer_author);
-//     let final_balance = stark_token_dispatcher.balanceOf(answer_author);
-
-//     assert_eq!(final_balance, initial_balance + question_value);
-
-//     stop_cheat_caller_address(starkoverflow_contract_address);
-// }

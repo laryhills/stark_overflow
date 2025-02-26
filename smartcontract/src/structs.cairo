@@ -23,3 +23,7 @@ pub struct Answer {
     pub description: ByteArray,
     pub question_id: u256,
 }
+
+pub struct QuestionId {
+    pub id: u256,
+}
