@@ -28,6 +28,7 @@ pub enum ADDRESSES {
     ASKER,
     RESPONDER,
     SPONSOR,
+    INTRUDER,
 }
 
 #[generate_trait]
@@ -37,6 +38,7 @@ pub impl ADDRESSESImpl of ADDRESSESTrait {
             ADDRESSES::ASKER => contract_address_const::<'ASKER-ADDRESS'>(),
             ADDRESSES::RESPONDER => contract_address_const::<'RESPONDER-ADDRESS'>(),
             ADDRESSES::SPONSOR => contract_address_const::<'SPONSOR-ADDRESS'>(),
+            ADDRESSES::INTRUDER => contract_address_const::<'INTRUDER-ADDRESS'>(),
         }
     }
 }

@@ -133,7 +133,7 @@ pub mod StarkOverflow {
             
             let correct_answer_id = self.getCorrectAnswer(question_id);
             let correct_answer = self.getAnswer(correct_answer_id);
-            self._stark_token_dispatcher().transferFrom(self.ownable.owner(), correct_answer.author, question.value);
+            self._stark_token_dispatcher().transfer(correct_answer.author, question.value);
         }        
         
         fn _stark_token_dispatcher(self: @ContractState) -> IERC20Dispatcher {
