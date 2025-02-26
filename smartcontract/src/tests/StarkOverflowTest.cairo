@@ -1,22 +1,14 @@
 use snforge_std::{CheatSpan, cheat_caller_address, byte_array::try_deserialize_bytearray_error};
-use starknet::get_caller_address;
 use super::common::{deployStarkOverflowContract, deploy_mock_stark_token, ADDRESSES, ADDRESSESTrait, approve_as_spender, EIGHTEEN_DECIMALS};
 use stark_overflow::StarkOverflow::{IStarkOverflowSafeDispatcher, IStarkOverflowSafeDispatcherTrait, IStarkOverflowDispatcherTrait};
-use stark_overflow::mock_contracts::MockSTARKToken::{IERC20Dispatcher, IERC20DispatcherTrait};
+use stark_overflow::mock_contracts::MockSTARKToken::IERC20DispatcherTrait;
 
 #[test]
 fn test_deploy_mock_stark_token() {
     let INITIAL_BALANCE: u256 = 100_000_000_000_000_000_000; // 100_STARK
-    let (_, contract_address) = deploy_mock_stark_token();
-    let stark_token_dispatcher = IERC20Dispatcher { contract_address };
-    println!("Contract address: {:?}", contract_address);
+    let (stark_token_dispatcher, _) = deploy_mock_stark_token();
 
-    let balance = stark_token_dispatcher.balanceOf(ADDRESSES::ASKER.get());
-    
-    // Debugging statement
-    println!("Balance: {:?}", balance);
-
-    assert(stark_token_dispatcher.balanceOf(ADDRESSES::ASKER.get()) == INITIAL_BALANCE, 'Balance should be > 0');
+    assert(stark_token_dispatcher.balanceOf(ADDRESSES::ASKER.get()) == INITIAL_BALANCE, 'Asker balance should be == 100');
 }
 
 #[test]
@@ -26,12 +18,6 @@ fn it_should_be_able_to_ask_a_question() {
     let (starkoverflow_dispatcher, starkoverflow_contract_address, stark_token_dispatcher) = deployStarkOverflowContract();
 
     let starting_balance = stark_token_dispatcher.balanceOf(starkoverflow_contract_address);
-    let asker_starting_balance = stark_token_dispatcher.balanceOf(asker);
-    println!("-- Asker address: {:?}", asker);
-    println!("-- Asker starting balance: {:?} STARK", asker_starting_balance / EIGHTEEN_DECIMALS);
-    println!("-- Stark Overflow contract address: {:?}", starkoverflow_contract_address);
-    println!("-- Stark Overflow starting balance: {:?} STARK", starting_balance);
-    println!("-- Stark Token contract address: {:?}", stark_token_dispatcher.contract_address);
     
     let description = "Question of test.";
     let value: u256 = 1 + EIGHTEEN_DECIMALS; // 1 STARK
@@ -39,7 +25,6 @@ fn it_should_be_able_to_ask_a_question() {
     approve_as_spender(asker, starkoverflow_contract_address, stark_token_dispatcher, value);
     
     cheat_caller_address(starkoverflow_contract_address, asker, CheatSpan::TargetCalls(1));
-    println!("Caller ({:?}) -- Asking a question...", get_caller_address());
     let question_id = starkoverflow_dispatcher.askQuestion(description.clone(), value);
 
     let question = starkoverflow_dispatcher.getQuestion(question_id);
@@ -49,7 +34,6 @@ fn it_should_be_able_to_ask_a_question() {
     assert_eq!(question.value, value);
 
     let final_balance = stark_token_dispatcher.balanceOf(starkoverflow_contract_address);
-    println!("-- Final balance in Stark Overflow contract: {:?} STARK", final_balance / EIGHTEEN_DECIMALS);
     assert_eq!(final_balance, starting_balance + value);
 }
 
@@ -119,17 +103,14 @@ fn it_should_be_able_to_mark_answer_as_correct() {
     let question_description = "Question of test marking answer as correct.";
     let question_value = 100 + EIGHTEEN_DECIMALS; // 100 STARK
     approve_as_spender(asker, starkoverflow_contract_address, stark_token_dispatcher, question_value);
-    println!("-- Asking a question...");
     let question_id = starkoverflow_dispatcher.askQuestion(question_description.clone(), question_value);
 
     cheat_caller_address(starkoverflow_contract_address, responder, CheatSpan::TargetCalls(1));
     let answer_description = "This is a test answer.";
-    println!("-- Submitting an answer...");
     let answer_id = starkoverflow_dispatcher.submitAnswer(question_id, answer_description.clone());
 
     // Trying to tag an answer with a user who is not the author of the question and getting an error
     cheat_caller_address(starkoverflow_contract_address, intruder, CheatSpan::TargetCalls(1));
-    println!("-- Trying to mark an answer as correct with a user who is not the author of the question...");
     match safe_dispatcher.markAnswerAsCorrect(question_id, answer_id) {
         Result::Ok(_) => panic!("It should not be allowed no one than the question author to mark the question as correct"),
         Result::Err(panic_data) => {
@@ -141,7 +122,6 @@ fn it_should_be_able_to_mark_answer_as_correct() {
     // Testing error: tries to mark a non-existent answer as correct
     let inexistent_answer_id = 999;
     cheat_caller_address(starkoverflow_contract_address, asker, CheatSpan::TargetCalls(2));
-    println!("-- Trying to mark a non-existent answer as correct...");
     match safe_dispatcher.markAnswerAsCorrect(question_id, inexistent_answer_id) {
         Result::Ok(_) => panic!("It should not be able to mark a not related answer for a question"),
         Result::Err(panic_data) => {
@@ -150,17 +130,14 @@ fn it_should_be_able_to_mark_answer_as_correct() {
         }
     };
 
-    println!("-- Marking the answer as correct...");
     starkoverflow_dispatcher.markAnswerAsCorrect(question_id, answer_id);
 
-    println!("-- Getting the correct answer...");
     let correct_answer_id = starkoverflow_dispatcher.getCorrectAnswer(question_id);
     assert_eq!(correct_answer_id, answer_id);
 
     let question_balance = starkoverflow_dispatcher.getQuestion(question_id).value;
     let responder_balance = stark_token_dispatcher.balanceOf(responder);
     let starkoverflow_contract_balance = stark_token_dispatcher.balanceOf(starkoverflow_contract_address);
-    println!("-- Asserting balances...");
     assert_eq!(starkoverflow_contract_balance, 0);
     assert_eq!(responder_balance, question_balance);
 }
