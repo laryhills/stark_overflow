@@ -1,6 +1,6 @@
 use starknet::ContractAddress;
 
-#[derive(Drop, Serde, starknet::Store)]
+#[derive(Drop, Serde, PartialEq, starknet::Store)]
 pub enum QuestionStatus {
     #[default]
     Open,
@@ -22,4 +22,8 @@ pub struct Answer {
     pub author: ContractAddress,
     pub description: ByteArray,
     pub question_id: u256,
+}
+
+pub struct QuestionId {
+    pub id: u256,
 }
