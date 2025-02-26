@@ -19,4 +19,11 @@ export const GlobalStyle = createGlobalStyle`
     border: none;
     cursor: pointer;
   }
+
+  a {
+  all: unset;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  }
 `;

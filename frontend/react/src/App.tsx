@@ -1,21 +1,25 @@
 import { ThemeProvider } from "styled-components"
 import { GlobalStyle } from "./styles/global"
-import { darkTheme, lightTheme } from "./styles/themes/default"
-import { Header } from "./components/Header"
+import { BrowserRouter } from "react-router-dom";
+import { Router } from "./router";
+import { Header } from "./components/Header";
+import { darkTheme, lightTheme } from "./styles/themes";
+
 import { useState } from "react";
-import { Home } from "./pages/Home";
 
 function App() {
-  const [theme, setTheme] = useState(lightTheme);
+  const [theme, setTheme] = useState(darkTheme);  
 
   const toggleTheme = () => {
-    setTheme(theme === lightTheme ? darkTheme : lightTheme);
-  };
+    setTheme(theme == lightTheme ? darkTheme : lightTheme);
+  }
 
   return (
     <ThemeProvider theme={theme}>
-      <Header theme={theme} toggleTheme={toggleTheme} />
-      <Home />
+      <BrowserRouter>
+        <Header toggleTheme={toggleTheme}/>
+        <Router />
+      </BrowserRouter>
       <GlobalStyle />      
     </ThemeProvider>
   )

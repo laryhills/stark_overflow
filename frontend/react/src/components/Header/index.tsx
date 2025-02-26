@@ -1,13 +1,15 @@
 import { Moon, Sun } from "phosphor-react";
 import { HeaderContainer, ToggleThemeButton } from "./style";
 import { lightTheme } from "../../styles/themes/light";
+import { useTheme } from "styled-components";
 
 interface HeaderProps {
-  theme: any;
   toggleTheme: () => void;
 }
 
-export function Header({ theme, toggleTheme }: HeaderProps) {
+export function Header({ toggleTheme }: HeaderProps) {
+  const theme = useTheme();
+  
   return (
     <HeaderContainer>
       <h1>StarkOverflow</h1>
