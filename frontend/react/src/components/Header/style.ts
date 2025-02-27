@@ -4,7 +4,6 @@ export const HeaderContainer = styled.header`
   display: flex;
   justify-content: space-between;
   width: 100%;
-  max-width: 1200px;
   padding: 20px;
   border-bottom: 1px solid ${(props) => props.theme.borderColor};
 `;
