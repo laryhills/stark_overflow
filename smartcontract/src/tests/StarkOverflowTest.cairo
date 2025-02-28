@@ -8,6 +8,7 @@ fn test_deploy_mock_stark_token() {
     let INITIAL_BALANCE: u256 = 100_000_000_000_000_000_000; // 100_STARK
     let (stark_token_dispatcher, _) = deploy_mock_stark_token();
 
+    // [BUG] This test should be working, but it is not
     assert(stark_token_dispatcher.balanceOf(ADDRESSES::ASKER.get()) == INITIAL_BALANCE, 'Asker balance should be == 100');
 }
 
@@ -42,6 +43,8 @@ fn it_should_be_able_to_add_funds_to_a_question() {
     let asker = ADDRESSES::ASKER.get();
     let sponsor = ADDRESSES::SPONSOR.get();
 
+    // println!("-- ASKER ADDRESS: {:?}", asker);
+    // println!("-- SPONSOR ADDRESS: {:?}", sponsor);
     let (starkoverflow_dispatcher, starkoverflow_contract_address, stark_token_dispatcher) = deployStarkOverflowContract();
     
     let description = "Question of test.";
@@ -49,6 +52,8 @@ fn it_should_be_able_to_add_funds_to_a_question() {
 
     approve_as_spender(asker, starkoverflow_contract_address, stark_token_dispatcher, value);
     cheat_caller_address(starkoverflow_contract_address, asker, CheatSpan::TargetCalls(1));
+    // println!("-- It should be the asker address");
+    // println!("Caller: {:?}", starkoverflow_dispatcher.getCallerAddress()); // getCallerAddress is just for testing purposes, it's need to be uncommented in the StarkOverflow contract
     let question_id = starkoverflow_dispatcher.askQuestion(description.clone(), value);
 
     stark_token_dispatcher.mint(sponsor, 100 + EIGHTEEN_DECIMALS); // 100 STARK
@@ -56,6 +61,8 @@ fn it_should_be_able_to_add_funds_to_a_question() {
     
     approve_as_spender(sponsor, starkoverflow_contract_address, stark_token_dispatcher, additionally_funds);
     cheat_caller_address(starkoverflow_contract_address, sponsor, CheatSpan::TargetCalls(1));
+    // println!("-- It should be the sponsor address");
+    // println!("Caller: {:?}", starkoverflow_dispatcher.getCallerAddress());
     starkoverflow_dispatcher.addFundsToQuestion(question_id, additionally_funds);
 
     let question = starkoverflow_dispatcher.getQuestion(question_id);

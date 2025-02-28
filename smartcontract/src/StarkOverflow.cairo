@@ -1,6 +1,7 @@
 use stark_overflow::structs::{Question, Answer, QuestionStatus};
 use stark_overflow::types::{QuestionId, AnswerId};
 use stark_overflow::mock_contracts::MockSTARKToken::{IERC20Dispatcher, IERC20DispatcherTrait};
+// use starknet::ContractAddress;
 
 #[starknet::interface]
 pub trait IStarkOverflow<T> {
@@ -11,18 +12,17 @@ pub trait IStarkOverflow<T> {
     fn getAnswer(self: @T, answer_id: u256) -> Answer;
     fn markAnswerAsCorrect(ref self: T, question_id: u256, answer_id: u256);
     fn getCorrectAnswer(self: @T, question_id: u256) -> AnswerId;
+    // fn getCallerAddress(self: @T) -> ContractAddress; // This is just for testing purposes
 }
 
 #[starknet::contract]
 pub mod StarkOverflow {
-    use super::IStarkOverflow;
-    use super::{Question, Answer, QuestionStatus, QuestionId, AnswerId};
+    use super::{Question, Answer, QuestionStatus, QuestionId, AnswerId, IStarkOverflow};
     use super::{IERC20Dispatcher, IERC20DispatcherTrait};
     use starknet::{get_caller_address, ContractAddress, get_contract_address};
     use starknet::storage::{StoragePointerReadAccess, StoragePointerWriteAccess, StoragePathEntry, Map};
     use openzeppelin::access::ownable::OwnableComponent;
     use stark_overflow::events::{QuestionAnswered, ChosenAnswer};
-    use stark_overflow::utils::{generate_question_id, generate_answer_id};
 
     component!(path: OwnableComponent, storage: ownable, event: OwnableEvent);
 
@@ -42,7 +42,9 @@ pub mod StarkOverflow {
     #[storage]
     struct Storage {
         questions: Map<u256, Question>,
+        last_question_id: u256,
         answers: Map<u256, Answer>,
+        last_answer_id: u256,
         questionIdAnswerId: Map<u256, u256>,
         stark_token_dispatcher: IERC20Dispatcher,
         #[substorage(v0)]
@@ -62,7 +64,7 @@ pub mod StarkOverflow {
     impl StarkOverflow of super::IStarkOverflow<ContractState> {
         fn askQuestion(ref self: ContractState, description: ByteArray, value: u256) -> QuestionId {
             let caller = get_caller_address();
-            let question_id = generate_question_id();
+            let question_id = self.last_question_id.read() + 1;
             let _question = Question { id: question_id, author: caller, description, value, status: QuestionStatus::Open };
             self._stark_token_dispatcher().transferFrom(caller, self.ownable.owner(), value);
             
@@ -85,7 +87,7 @@ pub mod StarkOverflow {
 
         fn submitAnswer(ref self: ContractState, question_id: u256, description: ByteArray) -> AnswerId {
             let caller = get_caller_address();
-            let answer_id = generate_answer_id();
+            let answer_id = self.last_answer_id.read() + 1;
             let answer = Answer { id: answer_id, author: caller, description, question_id };
 
             self.answers.entry(answer_id).write(answer);
@@ -120,6 +122,10 @@ pub mod StarkOverflow {
             let found_corret_answer_id = self.questionIdAnswerId.entry(question_id).read();
             found_corret_answer_id
         }
+
+        // fn getCallerAddress(self: @ContractState) -> ContractAddress {
+        //     get_caller_address()
+        // }
 
     }
     
