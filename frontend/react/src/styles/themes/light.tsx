@@ -3,4 +3,11 @@ export const lightTheme = {
   text: "#212529",
   cardBackground: "#ffffff",
   borderColor: "#dee2e6",
+  forum: {
+    topicCard: {
+      background: "#e3e0e0",
+      text: "#212529",
+      meta: "#949393"
+    }
+  }
 };

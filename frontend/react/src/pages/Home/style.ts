@@ -5,6 +5,6 @@ export const HomeContainer = styled.div`
   flex-direction: column;
   align-items: center;
   padding: 20px;
+  max-width: 900px;
+  margin: auto;
 `;
-
-;

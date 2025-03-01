@@ -6,8 +6,6 @@ export const CardsContainer = styled.div`
   gap: 1.5rem;
   margin-top: 1rem;
   width: 100%;
-  max-width: 900px;
-
 `;
 
 export const Card = styled.div`
