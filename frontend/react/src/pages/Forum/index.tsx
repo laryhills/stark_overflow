@@ -1,3 +1,4 @@
+import { NavLink } from "react-router-dom";
 import { SearchInput } from "./SearchInput";
 import { Button, ForumContainer, ForumList, Header, TopicAvatar, TopicCard, TopicFooter, TopicInfo, TopicMeta, TopicTitle } from "./style";
 import { CheckCircle, CurrencyDollar, Question } from "phosphor-react";
@@ -6,25 +7,25 @@ export function Forum() {
   const topics = [
     {
       avatar: "https://avatars.githubusercontent.com/u/62848833?v=4",
-      title: "Testes unitários em componentes que usam Design System",
+      title: "Unit tests in components that use Design System",
       author: "Maicon Domingues",
-      time: "hoje às 11:47",
+      time: "today at 11:47",
       amount: "2500,00",
       state: "open",
     },
     {
       avatar: "https://avatars.githubusercontent.com/u/62848833?v=4",
-      title: "[Dica] Carrossel com Keen-Slider",
+      title: "[Tip] Carousel with Keen-Slider",
       author: "Jordane Chaves Ferreira Rocha",
-      time: "ontem às 22:15",
+      time: "yesterday at 22:15",
       amount: "1850,00",
       state: "closed",
     },
     {
       avatar: "https://avatars.githubusercontent.com/u/62848833?v=4",
-      title: "Figma desafio 1 - React (DevMode)",
+      title: "Tests with Jest and React Testing Library",
       author: "Vitor Antonio Danner da Silva",
-      time: "ontem às 19:07",
+      time: "yesterday at 19:07",
       amount: "700,00",
       state: "open",
     },
@@ -34,7 +35,9 @@ export function Forum() {
     <ForumContainer>
       <Header>
         <SearchInput />
-        <Button>Novo Tópico</Button>
+        <NavLink to="new-question">
+          <Button>New Question</Button>
+        </NavLink>
       </Header>
       <ForumList>
         {topics.map((topic, index) => (
