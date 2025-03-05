@@ -4,8 +4,17 @@ export const HeaderContainer = styled.header`
   display: flex;
   justify-content: space-between;
   width: 100%;
-  padding: 20px;
+  padding: 0 20px;
   border-bottom: 1px solid ${(props) => props.theme.borderColor};
+
+  a {
+    margin: 0 auto;
+    transform: translateX(24px);
+  }
+`;
+
+export const Logo = styled.img`
+  width: 10rem;
 `;
 
 export const ToggleThemeButton = styled.button`
