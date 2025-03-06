@@ -1,6 +1,5 @@
 mod structs;
 mod events;
-mod utils;
 mod types;
 mod tests {
     pub mod common;
