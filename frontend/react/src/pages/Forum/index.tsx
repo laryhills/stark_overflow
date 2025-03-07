@@ -1,10 +1,11 @@
 import { NavLink } from "react-router-dom";
-import { SearchInput } from "./SearchInput";
+import { SearchInput } from "../../components/SearchInput";
 import { Button, ForumContainer, ForumList, Header, TopicAvatar, TopicCard, TopicFooter, TopicInfo, TopicMeta, TopicTitle } from "./style";
 import { CheckCircle, CurrencyDollar, Question } from "phosphor-react";
+import { useState } from "react";
 
 export function Forum() {
-  const topics = [
+  const initialTopics = [
     {
       avatar: "https://avatars.githubusercontent.com/u/62848833?v=4",
       title: "Unit tests in components that use Design System",
@@ -30,11 +31,23 @@ export function Forum() {
       state: "open",
     },
   ];
+  const [topics, setTopics] = useState(initialTopics);
 
+  const handleSearch = (searchTerm: string) => {
+    if (searchTerm === '') {
+        setTopics(initialTopics);
+        return;
+    }
+
+    const filteredTopics = initialTopics.filter((topic) =>
+      topic.title.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    setTopics(filteredTopics);
+  };
   return (
     <ForumContainer>
       <Header>
-        <SearchInput />
+      <SearchInput onSearch={handleSearch} />
         <NavLink to="new-question">
           <Button>New Question</Button>
         </NavLink>
