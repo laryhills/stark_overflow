@@ -1,19 +1,27 @@
 import styled from 'styled-components';
 
 export const Container = styled.div`
-  background-color: #111;
   color: white;
   min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: space-between;
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 100%;
+  grid-template-rows: 20vh 80vh 100vh 100vh 100vh 100vh 20vh;
+  grid-template-areas: 
+    "header"
+    "firstview" 
+    "theproblem" 
+    "thesolution"
+    "howitworks"
+    "marketpotential"
+    "footer";
   padding: 12px;
 `;
 
 export const Header = styled.header`
+  grid-area: header;
   width: 100%;
-  max-width: 1200px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -54,10 +62,19 @@ export const Button = styled.button`
   }
 `;
 
+export const FirstView = styled.div`
+  grid-area: firstview;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-around;
+`;
+
 export const Main = styled.main`
   text-align: center;
   margin-top: 3rem;
   max-width: 800px;
+
 `;
 
 export const Section = styled.section`
@@ -65,7 +82,7 @@ export const Section = styled.section`
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 20px;
   margin-top: 4rem;
-  max-width: 1000px;
+  width: 100%;
 `;
 
 export const Card = styled.div`
@@ -76,6 +93,7 @@ export const Card = styled.div`
 `;
 
 export const Footer = styled.footer`
+  grid-area: footer;
   margin-top: 3rem;
   padding: 16px;
   border-top: 1px solid #444;
