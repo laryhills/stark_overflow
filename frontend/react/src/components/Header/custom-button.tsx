@@ -1,8 +1,8 @@
-import { useState, useRef, useEffect } from "react";
-import { useAccount, useConnect, useDisconnect } from "@starknet-react/core";
+import { useRef, useEffect, useState } from "react";
+import { useAccount, useConnect, useDisconnect, Connector } from "@starknet-react/core";
 import { WALLET_LOGOS } from "./constant";
 import { AddressButton, ChevronIcon, CloseButton, ConnectButtonContainer, Dropdown, DropdownItem, InstallButton, InstallButtonsContainer, InstallRedirect, ModalContent, ModalHeader, ModalOverlay, ModalTitle, NoWalletsMessage, StyledButton, WalletButton, WalletIcon, WalletInfo, WalletList, WalletLogo, WalletName, WalletStatus } from "./style";
-
+import { useWallet } from "../../providers/wallet-connect-context";
 
 // Function to truncate address for display
 const truncateAddress = (address: string) => {
@@ -20,18 +20,10 @@ export function ConnectButton() {
     const { connect, connectors } = useConnect();
     const { isConnected, address } = useAccount();
     const { disconnect } = useDisconnect();
+    const { isModalOpen, openConnectModal, closeConnectModal, isWalletDetected } = useWallet();
     
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [hasWallets, setHasWallets] = useState(false);
-    
     const dropdownRef = useRef<HTMLDivElement>(null);
-    
-    // Check if any wallets are detected
-    useEffect(() => {
-      const walletsAvailable = connectors.some(connector => connector.available());
-      setHasWallets(walletsAvailable);
-    }, [connectors]);
     
     // Close dropdown when clicking outside
     useEffect(() => {
@@ -48,21 +40,16 @@ export function ConnectButton() {
     }, []);
     
     // Handle wallet connection
-    const handleConnect = (connector: any) => {
+    const handleConnect = (connector: Connector) => {
       connect({ connector });
       console.log(connector);
-      setIsModalOpen(false);
+      closeConnectModal();
     };
     
     // Handle wallet disconnection
     const handleDisconnect = () => {
       disconnect();
       setIsDropdownOpen(false);
-    };
-    
-    // Open connect wallet modal
-    const openConnectModal = () => {
-      setIsModalOpen(true);
     };
     
     return (
@@ -90,15 +77,15 @@ export function ConnectButton() {
         
         {/* Connect Wallet Modal */}
         <ModalOverlay isOpen={isModalOpen} onClick={(e) => {
-          if (e.target === e.currentTarget) setIsModalOpen(false);
+          if (e.target === e.currentTarget) closeConnectModal();
         }}>
           <ModalContent onClick={(e) => e.stopPropagation()}>
             <ModalHeader>
               <ModalTitle>Connect Wallet</ModalTitle>
-              <CloseButton onClick={() => setIsModalOpen(false)}>×</CloseButton>
+              <CloseButton onClick={closeConnectModal}>×</CloseButton>
             </ModalHeader>
             
-            {hasWallets ? (
+            {isWalletDetected ? (
               <WalletList>
                 {connectors.map((connector) => {
                   const isAvailable = connector.available();
@@ -125,27 +112,18 @@ export function ConnectButton() {
                 <p>Please install one of the following wallets to continue:</p>
                 
                 <InstallButtonsContainer>
-
-                    <InstallRedirect  href={WALLET_INSTALL_LINKS.argentX} 
-                    target="_blank" 
-                    rel="noopener noreferrer">
-
-                  <InstallButton>
-                    <WalletLogo src={WALLET_LOGOS.argentX} alt="ArgentX Logo" />
-                    Install ArgentX
-                  </InstallButton>
-                    </InstallRedirect>
+                  <InstallRedirect href={WALLET_INSTALL_LINKS.argentX} target="_blank" rel="noopener noreferrer">
+                    <InstallButton>
+                      <WalletLogo src={WALLET_LOGOS.argentX} alt="ArgentX Logo" />
+                      Install ArgentX
+                    </InstallButton>
+                  </InstallRedirect>
                   
-                  <InstallRedirect  
-                    href={WALLET_INSTALL_LINKS.braavos} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                  >
-
-                  <InstallButton>
-                    <WalletLogo src={WALLET_LOGOS.braavos} alt="Braavos Logo" />
-                    Install Braavos
-                  </InstallButton>
+                  <InstallRedirect href={WALLET_INSTALL_LINKS.braavos} target="_blank" rel="noopener noreferrer">
+                    <InstallButton>
+                      <WalletLogo src={WALLET_LOGOS.braavos} alt="Braavos Logo" />
+                      Install Braavos
+                    </InstallButton>
                   </InstallRedirect>
                 </InstallButtonsContainer>
               </NoWalletsMessage>

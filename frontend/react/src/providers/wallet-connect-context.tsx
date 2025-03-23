@@ -6,9 +6,11 @@ interface WalletContextType {
   isConnected: boolean;
   address: string | undefined;
   isConnecting: boolean;
-  isWalletDetected: boolean;
+  isWalletDetected: boolean; // Expose wallet detection state
   error: Error | null;
+  isModalOpen: boolean;
   openConnectModal: () => void;
+  closeConnectModal: () => void;
 }
 
 // Create the context
@@ -18,7 +20,7 @@ const WalletContext = createContext<WalletContextType | undefined>(undefined);
 export function WalletProvider({ children }: { children: ReactNode }) {
   const { isConnected = false, address, status } = useAccount();
   const { connectors } = useConnect();
-  const [isWalletDetected, setIsWalletDetected] = useState(false);
+  const [isWalletDetected, setIsWalletDetected] = useState(false); // Manage wallet detection state
   const [error, setError] = useState<Error | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   
@@ -41,15 +43,22 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   const openConnectModal = () => {
     setIsModalOpen(true);
   };
+
+  // Function to close the connect modal
+  const closeConnectModal = () => {
+    setIsModalOpen(false);
+  };
   
   // Context value
   const value = {
     isConnected,
     address,
     isConnecting: status === "connecting",
-    isWalletDetected,
+    isWalletDetected, // Expose wallet detection state
     error,
-    openConnectModal
+    isModalOpen,
+    openConnectModal,
+    closeConnectModal
   };
   
   return (

@@ -17,15 +17,6 @@ export function StarknetProvider({ children }: { children: React.ReactNode }) {
     order: "alphabetical",
   });
 
-  // Check localStorage for previous connection state
-  useEffect(() => {
-    const storedConnection = localStorage.getItem("starknet-connected");
-    if (storedConnection === "true") {
-      // Trigger auto-connect logic
-      console.log("Auto-connecting to the last used wallet...");
-    }
-  }, []);
-
   return (
     <StarknetConfig
       chains={[mainnet]}
