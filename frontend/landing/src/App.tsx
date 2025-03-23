@@ -8,6 +8,9 @@ import { useTheme } from "./hooks/useTheme";
 import { ProblemAndSolution } from "./sections/ProblemAndSolution";
 import { Team } from "./sections/Team";
 
+import teamMembers from "./data/team.json";
+import sponsors from "./data/sponsors.json";
+
 const Container = styled.main`
   max-width: 1200px;
   margin: 0 auto;
@@ -20,14 +23,15 @@ export function App() {
   const { theme, toggleTheme } = useTheme();
   const currentTheme = theme === "dark" ? darkTheme : lightTheme;
 
+  
   return (
     <ThemeProvider theme={currentTheme}>
       <Navbar toggleTheme={toggleTheme} />
       <Container>
-        <Hero />
-        <ProblemAndSolution />
-        <Sponsors />
-        <Team />
+        <Hero id="hero" />
+        <ProblemAndSolution id="how-it-works" />
+        <Sponsors id="sponsors" sponsors={sponsors} />
+        <Team id="team" teamMembers={teamMembers} />
       </Container>
       <GlobalStyles />
     </ThemeProvider>
