@@ -26,23 +26,6 @@ export function StarknetProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  useEffect(() => {
-    const handleConnection = (isConnected: boolean) => {
-      localStorage.setItem("starknet-connected", isConnected ? "true" : "false");
-    };
-
-    const onConnect = () => handleConnection(true);
-    const onDisconnect = () => handleConnection(false);
-
-    window.addEventListener("starknet-connected", onConnect);
-    window.addEventListener("starknet-disconnected", onDisconnect);
-
-    return () => {
-      window.removeEventListener("starknet-connected", onConnect);
-      window.removeEventListener("starknet-disconnected", onDisconnect);
-    };
-  }, []);
-
   return (
     <StarknetConfig
       chains={[mainnet]}

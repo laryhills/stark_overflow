@@ -10,7 +10,6 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@argent/get-starknet": "^6.4.7",
     "@starknet-react/chains": "^3.1.2",
     "@starknet-react/core": "^3.7.2",
     "phosphor-react": "^1.4.1",
@@ -19,7 +18,6 @@
     "react-dom": "^19.0.0",
     "react-router-dom": "^7.2.0",
     "starknet": "^6.23.1",
-    "starknetkit": "^2.6.1",
     "styled-components": "^6.1.15"
   },
   "devDependencies": {
