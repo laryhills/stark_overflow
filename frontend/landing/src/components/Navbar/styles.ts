@@ -75,11 +75,14 @@ export const NavLinks = styled.nav<{$isOpen: boolean}>`
   display: flex;
   align-items: center;
   gap: 24px;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
   
   @media (min-width: 768px) {
     display: flex;
   }
-  // Faça um menu para mobile
+  // Mobile Menu
   @media (max-width: 768px) {
     flex-direction: column;
     position: fixed;

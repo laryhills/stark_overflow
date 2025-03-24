@@ -10,6 +10,10 @@ export const FlowCardContainer = styled.div`
   width: 100%;
   overflow: hidden;
   color: white;
+
+  @media (max-width: 768px) {
+    overflow-x: scroll;
+  }
 `;
 
 export const StepContainer = styled.div<StepProps>`

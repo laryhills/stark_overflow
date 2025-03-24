@@ -113,6 +113,13 @@ export const CardsContainer = styled.section`
   justify-content: space-between;
   background-color: ${({ theme }) => theme.background};
   padding: 80px 0;
+  gap: 10px;
+
+  // Mobile Menu
+  @media (max-width: 900px) {
+    flex-direction: column;
+    gap: 32px;
+  }
 `
 
 export const Card = styled.div`
@@ -124,6 +131,7 @@ export const Card = styled.div`
   max-width: 600px;
   margin-left: auto;
   margin-right: auto;
+  width: 100%;
 
   &:hover {
     transform: translateY(-4px);

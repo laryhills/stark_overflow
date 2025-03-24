@@ -2,9 +2,11 @@ import type React from "react"
 import { GithubLogo } from "@phosphor-icons/react"
 import { HeroContainer, HeroContent, Title, Subtitle, ButtonsContainer, SecondaryButton, Card, CardsContainer } from "./styles"
 
-export const Hero: React.FC = () => {
+interface HeroProps extends React.HTMLAttributes<HTMLDivElement> {}
+
+export function Hero({ ...props }: HeroProps) {
   return (
-    <HeroContainer>
+    <HeroContainer {...props}>
       <HeroContent>
         <Title>
           The <span>Revolution of Problem</span> <span className="highlight">Solving</span>

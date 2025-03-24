@@ -48,7 +48,7 @@ export function Navbar({ toggleTheme }: NavbarProps) {
 
   return (
     <NavbarContainer $isScrolled={isScrolled}>
-      <Logo href="/">
+      <Logo href="#hero">
         <img src={logoStarkOverflow} style={{ height: "100%"}} />
         <span>Stark Overflow</span>
       </Logo>
@@ -57,10 +57,9 @@ export function Navbar({ toggleTheme }: NavbarProps) {
         <List size={20} />
       </MobileMenuButton>
       <NavLinks $isOpen={isMenuOpen}>
-
-        <NavLink href="#features">Features</NavLink>
-        <NavLink href="#testimonials">Testimonials</NavLink>
-        <NavLink href="#pricing">Pricing</NavLink>
+        <NavLink href="#how-it-works">How it Works</NavLink>
+        <NavLink href="#sponsors">Sponsors</NavLink>
+        <NavLink href="#team">Our Team</NavLink>
         <NavLink href="#faq">FAQ</NavLink>
       </NavLinks>
 
