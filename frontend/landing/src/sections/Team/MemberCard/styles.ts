@@ -19,7 +19,7 @@ export const MemberImage = styled.img`
 `;
 
 export const MemberName = styled.h3`
-  color: white;
+  color: ${({ theme }) => theme.text};
   font-size: 1.5rem;
   margin-bottom: 0.5rem;
 `;
@@ -31,7 +31,7 @@ export const MemberRole = styled.p`
 `;
 
 export const MemberDescription = styled.p`
-  color: #e6e6e6;
+  color: ${({ theme }) => theme.textSecondary};
   font-size: 0.9rem;
   line-height: 1.5;
   margin-bottom: 1.5rem;

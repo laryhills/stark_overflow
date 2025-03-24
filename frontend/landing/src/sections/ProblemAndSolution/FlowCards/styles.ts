@@ -64,6 +64,7 @@ export const StepContent = styled.div`
 `;
 
 export const StepTitle = styled.h3`
+color: ${({ theme }) => theme.text};
   font-size: 1.25rem;
   font-weight: bold;
   margin-bottom: 0.5rem;
@@ -71,6 +72,7 @@ export const StepTitle = styled.h3`
 `;
 
 export const StepDescription = styled.p`
+color: ${({ theme }) => theme.textSecondary};
   font-size: 0.9rem;
   opacity: 0.8;
   z-index: 2;
