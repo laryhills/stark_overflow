@@ -1,4 +1,4 @@
-import { FacebookLogo, InstagramLogo, LinkedinLogo } from "@phosphor-icons/react";
+import { FacebookLogo, GithubLogo, InstagramLogo, LinkedinLogo, XLogo } from "@phosphor-icons/react";
 import { MemberCardContainer, MemberDescription, MemberImage, MemberName, MemberRole, SocialLink, SocialLinks } from "./styles";
 
 export interface MemberCardProps {
@@ -10,6 +10,8 @@ export interface MemberCardProps {
     linkedin?: string;
     facebook?: string;
     instagram?: string;
+    github?: string;
+    x?: string;
   };
 }
 
@@ -34,6 +36,16 @@ export function MemberCard({ name, role, description, image, socials }: MemberCa
         {socials.instagram && (
           <SocialLink href={socials.instagram} target="_blank" rel="noopener noreferrer" aria-label={`${name}'s Instagram profile`}>
             <InstagramLogo weight="fill" />
+          </SocialLink>
+        )}
+        {socials.github && (
+          <SocialLink href={socials.github} target="_blank" rel="noopener noreferrer" aria-label={`${name}'s Github profile`}>
+            <GithubLogo weight="fill" />
+          </SocialLink>
+        )}
+        {socials.x && (
+          <SocialLink href={socials.x} target="_blank" rel="noopener noreferrer" aria-label={`${name}'s X profile`}>
+            <XLogo weight="fill" />
           </SocialLink>
         )}
       </SocialLinks>
