@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 
 export const ShowcaseContainer = styled.section`
-  background-color: #121212;
+  background-color: ${({ theme }) => theme.background};
   padding: 4rem 2rem;
   width: 100%;
 `;

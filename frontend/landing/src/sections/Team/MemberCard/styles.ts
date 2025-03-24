@@ -4,7 +4,7 @@ export const MemberCardContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  background-color: #1a1a1a;
+  background-color: ${({ theme }) => theme.background};
   padding: 2rem;
   border-radius: 0.5rem;
   text-align: center;
