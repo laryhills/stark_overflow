@@ -8,7 +8,7 @@ export const ShowcaseContainer = styled.section`
 
 export const ShowcaseTitle = styled.h2`
   font-size: 2rem;
-  color: white;
+  color: ${({ theme }) => theme.text};
   margin-bottom: 0.5rem;
 
   span {

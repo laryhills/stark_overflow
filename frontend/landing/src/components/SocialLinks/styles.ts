@@ -7,7 +7,7 @@ export const SocialLinksContainer = styled.div`
 `;
 
 export const SocialLink = styled.a`
-  color: #e6e6e6;
+  color: ${({ theme }) => theme.textSecondary};
   font-size: 1.25rem;
   transition: color 0.2s ease-in-out;
 
