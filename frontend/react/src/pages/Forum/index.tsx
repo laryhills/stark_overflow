@@ -27,7 +27,7 @@ export function Forum() {
       title: "Tests with Jest and React Testing Library",
       author: "Vitor Antonio Danner da Silva",
       time: "yesterday at 19:07",
-      amount: "700,00",
+      amount: "7,00",
       state: "open",
     },
   ];

@@ -1,43 +1,39 @@
-import StarkOverflowLogo from './assets/starkoverflow.svg';
-import { Button, Card, Container, Footer, Header, Logo, Main, Section } from './style';
+import styled, { ThemeProvider } from "styled-components";
+import { GlobalStyles } from "./styles/GlobalStyle";
+import { darkTheme, lightTheme } from "./styles/themes";
+import { Navbar } from "@components/Navbar";
+import { Hero } from "./sections/Hero";
+import { useTheme } from "./hooks/useTheme";
+import { ProblemAndSolution } from "./sections/ProblemAndSolution";
+import { Team } from "./sections/Team";
 
-function App() {
+import teamMembers from "./data/team.json";
+import collaborators from "./data/collaborators.json";
+import { Collaborators } from "./sections/Collaborators";
 
+const Container = styled.main`
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+  position: relative;
+  z-index: 1;
+`;
+
+export function App() {
+  const { theme, toggleTheme } = useTheme();
+  const currentTheme = theme === "dark" ? darkTheme : lightTheme;
+
+  
   return (
-    <Container>
-      <Header>
-        <Logo src={StarkOverflowLogo}/>
-      </Header>
-
-      <Main>
-        <h2 style={{ fontSize: '2rem', fontWeight: 'bold' }}>The Revolution of Problem Solving</h2>
-        <p style={{ fontSize: '1.2rem', color: '#ccc', margin: '20px 0' }}>
-          A decentralized platform that financially rewards those who share knowledge.
-          Deposit funds into questions and encourage high-quality answers.
-        </p>
-        <Button>Learn More</Button>
-      </Main>
-
-      <Section>
-        <Card>
-          <h3>Incentive System</h3>
-          <p>Accepted answers receive financial rewards, ensuring quality.</p>
-        </Card>
-        <Card>
-          <h3>Web3 and Smart Contracts</h3>
-          <p>Everything is recorded in smart contracts, bringing transparency.</p>
-        </Card>
-        <Card>
-          <h3>Engaged Community</h3>
-          <p>A space for developers, enthusiasts, and experts.</p>
-        </Card>
-      </Section>
-
-      <Footer>
-        <p>&copy; 2025 Stark Overflow - All rights reserved.</p>
-      </Footer>
-    </Container>
-  )
+    <ThemeProvider theme={currentTheme}>
+      <Navbar toggleTheme={toggleTheme} />
+      <Container>
+        <Hero id="hero" />
+        <ProblemAndSolution id="how-it-works" />
+        <Team id="team" teamMembers={teamMembers} />
+        <Collaborators id="collaborators" collaborators={collaborators} />
+      </Container>
+      <GlobalStyles />
+    </ThemeProvider>
+  );
 }
-
-export default App

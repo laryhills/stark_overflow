@@ -15,10 +15,7 @@ pub fn deployStarkOverflowContract() -> (IStarkOverflowDispatcher, ContractAddre
     
     let (starkoverflow_contract_address, _) = starkoverflow_class_hash.deploy(@constructor_calldata).unwrap();
     let starkoverflow_dispatcher = IStarkOverflowDispatcher { contract_address: starkoverflow_contract_address };
-    
-    // [BUG] Without this line all the tests will fail
-    println!("-- Stark Overflow contract deployed on: {:?}", starkoverflow_contract_address);
-    
+        
     (starkoverflow_dispatcher, starkoverflow_contract_address, stark_token_dispatcher)
 }
 
