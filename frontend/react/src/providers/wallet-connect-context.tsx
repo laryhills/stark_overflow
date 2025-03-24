@@ -1,5 +1,5 @@
 import React, { createContext, useContext, ReactNode, useState, useEffect } from "react";
-import { AccountStatus, useAccount, useConnect } from "@starknet-react/core";
+import { useAccount, useConnect } from "@starknet-react/core";
 
 // Define the context type
 interface WalletContextType {
@@ -7,7 +7,6 @@ interface WalletContextType {
   address: string | undefined;
   isConnecting: boolean;
   isWalletDetected: boolean; // Expose wallet detection state
-  error: Error | null;
   isModalOpen: boolean;
   openConnectModal: () => void;
   closeConnectModal: () => void;
@@ -21,7 +20,6 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   const { isConnected = false, address, status } = useAccount();
   const { connectors } = useConnect();
   const [isWalletDetected, setIsWalletDetected] = useState(false); // Manage wallet detection state
-  const [error, setError] = useState<Error | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   
   // Check if any wallet is available in the browser
@@ -30,14 +28,6 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     setIsWalletDetected(hasWallet);
   }, [connectors]);
   
-  // Handle connection errors
-  useEffect(() => {
-    if (status === "error" as AccountStatus) {
-      setError(new Error("Failed to connect wallet"));
-    } else {
-      setError(null);
-    }
-  }, [status]);
   
   // Function to open the connect modal from anywhere in the app
   const openConnectModal = () => {
@@ -55,7 +45,6 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     address,
     isConnecting: status === "connecting",
     isWalletDetected, // Expose wallet detection state
-    error,
     isModalOpen,
     openConnectModal,
     closeConnectModal
