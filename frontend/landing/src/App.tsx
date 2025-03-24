@@ -3,13 +3,13 @@ import { GlobalStyles } from "./styles/GlobalStyle";
 import { darkTheme, lightTheme } from "./styles/themes";
 import { Navbar } from "@components/Navbar";
 import { Hero } from "./sections/Hero";
-import { Sponsors } from "./sections/Sponsors";
 import { useTheme } from "./hooks/useTheme";
 import { ProblemAndSolution } from "./sections/ProblemAndSolution";
 import { Team } from "./sections/Team";
 
 import teamMembers from "./data/team.json";
-import sponsors from "./data/sponsors.json";
+import collaborators from "./data/collaborators.json";
+import { Collaborators } from "./sections/Collaborators";
 
 const Container = styled.main`
   max-width: 1200px;
@@ -30,8 +30,8 @@ export function App() {
       <Container>
         <Hero id="hero" />
         <ProblemAndSolution id="how-it-works" />
-        <Sponsors id="sponsors" sponsors={sponsors} />
         <Team id="team" teamMembers={teamMembers} />
+        <Collaborators id="collaborators" collaborators={collaborators} />
       </Container>
       <GlobalStyles />
     </ThemeProvider>

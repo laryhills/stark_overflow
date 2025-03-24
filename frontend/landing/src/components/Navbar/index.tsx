@@ -58,9 +58,8 @@ export function Navbar({ toggleTheme }: NavbarProps) {
       </MobileMenuButton>
       <NavLinks $isOpen={isMenuOpen}>
         <NavLink href="#how-it-works">How it Works</NavLink>
-        <NavLink href="#sponsors">Sponsors</NavLink>
         <NavLink href="#team">Our Team</NavLink>
-        <NavLink href="#faq">FAQ</NavLink>
+        <NavLink href="#collaborators">Collaborators</NavLink>
       </NavLinks>
 
       <ButtonsContainer>

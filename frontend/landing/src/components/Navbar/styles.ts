@@ -78,6 +78,7 @@ export const NavLinks = styled.nav<{$isOpen: boolean}>`
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
+  z-index: 1;
   
   @media (min-width: 768px) {
     display: flex;
