@@ -6,6 +6,12 @@ export const InfoCardsContainer = styled.div`
   margin-top: 32px;
   max-width: 1200px;
   margin: 0 auto;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    text-align: center;
+    gap: 30px;
+  }
 `;
 
 export const InfoCard = styled.div`
