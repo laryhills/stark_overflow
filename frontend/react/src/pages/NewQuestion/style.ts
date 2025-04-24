@@ -235,6 +235,20 @@ export const PreviewContainer = styled.div`
   overflow-y: auto;
   line-height: 1.6;
 
+  .markdown-preview {
+    img {
+      max-width: 100%;
+      border-radius: 4px;
+      margin: 1rem 0;
+    }
+  }
+
+  .uploaded-images-preview {
+    margin-bottom: 1rem;
+    border-bottom: 1px dashed ${(props) => props.theme.borderColor};
+    padding-bottom: 1rem;
+  }
+
   h1, h2, h3, h4, h5, h6 {
     margin-top: 1.5em;
     margin-bottom: 0.5em;

@@ -46,6 +46,12 @@ interface CodeProps {
   children?: React.ReactNode
 }
 
+// Define proper types for the image component props
+interface ImageProps {
+  src?: string
+  alt?: string
+}
+
 // Custom code component for syntax highlighting
 const CodeBlock: React.FC<CodeProps> = ({ inline, className, children, ...props }) => {
   const match = /language-(\w+)/.exec(className || "")
@@ -79,7 +85,7 @@ export function NewQuestion() {
   const [amount, setAmount] = useState("")
   const [repository, setRepository] = useState("")
   const [tags, setTags] = useState("")
-  const [activeTab, setActiveTab] = useState<"write" | "preview">("write");
+  const [activeTab, setActiveTab] = useState<"write" | "preview">("write")
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([])
   const [isUploading, setIsUploading] = useState(false)
@@ -90,6 +96,9 @@ export function NewQuestion() {
   const navigate = useNavigate()
   const { isConnected } = useAccount()
   const { openConnectModal } = useWallet()
+
+  // Create a map of image URLs to their blob URLs for the preview
+  const [imageMap, setImageMap] = useState<Record<string, string>>({})
 
   // Form validation
   const validateForm = () => {
@@ -150,6 +159,12 @@ export function NewQuestion() {
           const imageMarkdown = `![${file.name}](${uploadedFile.url})\n`
           setDescription((prev) => prev + imageMarkdown)
 
+          // Update the image map for preview
+          setImageMap((prev) => ({
+            ...prev,
+            [uploadedFile.url]: uploadedFile.url,
+          }))
+
           // Reset upload state after a delay
           setTimeout(() => {
             setIsUploading(false)
@@ -186,6 +201,11 @@ export function NewQuestion() {
       // Remove from description
       const imageMarkdown = `![${file.name}](${file.url})`
       setDescription((prev) => prev.replace(imageMarkdown, ""))
+
+      // Remove from image map
+      const newImageMap = { ...imageMap }
+      delete newImageMap[file.url]
+      setImageMap(newImageMap)
     } catch (error) {
       console.error("File deletion failed:", error)
     }
@@ -255,6 +275,14 @@ export function NewQuestion() {
       console.error("Transaction error:", error)
       setTransactionStatus("error")
     }
+  }
+
+  // Custom image renderer that uses our image map
+  const ImageRenderer = ({ src, alt }: ImageProps) => {
+    if (!src) return null
+
+    // Use the actual blob URL from our map
+    return <img src={src || "/placeholder.svg"} alt={alt || ""} style={{ maxWidth: "100%" }} />
   }
 
   return (
@@ -399,14 +427,32 @@ export function NewQuestion() {
           ) : (
             <PreviewContainer>
               {description ? (
-                <ReactMarkdown
-                  remarkPlugins={[remarkGfm]}
-                  components={{
-                    code: CodeBlock,
-                  }}
-                >
-                  {description}
-                </ReactMarkdown>
+                <div className="markdown-preview">
+                  {/* Render uploaded images directly for preview */}
+                  {uploadedFiles.length > 0 && (
+                    <div className="uploaded-images-preview">
+                      {uploadedFiles.map((file) => (
+                        <img
+                          key={file.id}
+                          src={file.url || "/placeholder.svg"}
+                          alt={file.name}
+                          style={{ maxWidth: "100%", marginBottom: "1rem" }}
+                        />
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Render markdown content */}
+                  <ReactMarkdown
+                    remarkPlugins={[remarkGfm]}
+                    components={{
+                      code: CodeBlock,
+                      img: ImageRenderer,
+                    }}
+                  >
+                    {description}
+                  </ReactMarkdown>
+                </div>
               ) : (
                 <p className="empty-preview">Your preview will appear here...</p>
               )}
