@@ -1,10 +1,14 @@
-import { lightTheme } from "./light";
-import { darkTheme } from "./dark";
+import { darkTheme } from "./dark"
+import { lightTheme } from "./light"
+
+// Extend the default theme to include textSecondary
+export type Theme = typeof defaultTheme
 
 const defaultTheme = {
-  ...darkTheme
-};
+  ...darkTheme,
+  textSecondary: "#71717a",
+}
 
-export { defaultTheme, lightTheme, darkTheme };
+export { defaultTheme, lightTheme, darkTheme }
 
-export default defaultTheme;
+export default defaultTheme
