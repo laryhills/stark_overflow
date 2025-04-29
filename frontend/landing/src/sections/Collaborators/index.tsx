@@ -18,7 +18,7 @@ export function Collaborators({ ...props }) {
           name: userInfo.name ?? userInfo.login,
           avatar: userInfo.avatar_url,
           socials: [
-            { provider: 'github', url: userInfo.url },
+            { provider: 'github', url: userInfo.html_url },
             ...await getUserSocialAccounts(contributor.login!)
           ],
         }
