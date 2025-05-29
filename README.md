@@ -100,11 +100,38 @@ cd smartcontract
 scarb test
 ```
 
-### Deploying Contracts
-Make sure you are authenticated on Starknet:
-```bash
-starknet deploy --contract target/dev/stark_overflow_tests_StarkOverflow.test.contract_class.json
-```
+### Deploying Contracts in Starknet Devnet
+#### Linux:
+<ol>
+ <li>Install starknet-devnet. <a href="https://0xspaceshard.github.io/starknet-devnet/docs/running/install">tutorial</a></li>
+ <li>Install starknet foundry. <a href="https://foundry-rs.github.io/starknet-foundry/getting-started/installation.html#linux-and-macos">tutorial</a></li>
+ <li>Runs starknet-devnet with seed 0: <code>starknet-devnet seed=0</code></li>
+ <ol type="I">
+  <li><code>sncast --profile=devnet declare --contract-name=StarkOverflowToken</code></li>
+  <li><code>sncast --profile=devnet declare --contract-name=StarkOverflow</code></li>
+ </ol>
+ <li>Deploy the contracts <a href="https://docs.starknet.io/quick-start/devnet/#deploying_hellostarknet_locally">tutorial</a></li>
+ <ol type="I">
+  <li><code>sncast --profile=devnet deploy --clash-hash=[StarkOverflowToken class hash] --salt=0 --arguments "'18', '100000000000000000000', [recipient address], [owner address], '1000000000000000000000'"</code></li>
+  <li><code>sncast --profile=devnet deploy --clash-hash=[StarkOverflow class hash] --salt=0 --arguments "[StarkOverflowToken address]"</code></li>
+ </ol>
+</ol>
+
+#### Windows:
+<ol>
+ <li>Install starknet-devnet via Docker. <a href="https://0xspaceshard.github.io/starknet-devnet/docs/running/docker">tutorial</a></li>
+ <li>Install starknet foundry. <a href="https://foundry-rs.github.io/starknet-foundry/getting-started/installation.html#windows">tutorial</a></li>
+ <li>Runs the container docker with starknet-devnet seed 0</li>
+ <ol type="I">
+  <li><code>sncast --profile=devnet declare --contract-name=StarkOverflowToken</code></li>
+  <li><code>sncast --profile=devnet declare --contract-name=StarkOverflow</code></li>
+ </ol>
+ <li>Deploy the contracts <a href="https://docs.starknet.io/quick-start/devnet/#deploying_hellostarknet_locally">tutorial</a></li>
+ <ol type="I">
+  <li><code>sncast --profile=devnet deploy --clash-hash=[StarkOverflowToken class hash] --salt=0 --arguments "'18', '100000000000000000000', [recipient address], [owner address], '1000000000000000000000'"</code></li>
+  <li><code>sncast --profile=devnet deploy --clash-hash=[StarkOverflow class hash] --salt=0 --constructor-calldata=[StarkOverflowToken address]</code></li>
+ </ol>
+</ol>
 
 ## 🛠️ Technologies Used
 
@@ -120,7 +147,7 @@ starknet deploy --contract target/dev/stark_overflow_tests_StarkOverflow.test.co
 2. Create a branch (`git checkout -b feature/MyFeature`)
 3. Commit your changes (`git commit -m 'Add my feature'`)
 4. Push to the branch (`git push origin feature/MyFeature`)
-5. Open a Pull Request
+5. Open a Pull Request to the development branch
 
 ## 📜 License
 
@@ -129,5 +156,10 @@ This project is licensed under the [MIT License](LICENSE).
 ## 📧 Contact
 
 Müller Esposito Nunes  
-[LinkedIn](https://linkedin.com/in/mulleresposito) | [Email](mailto:mulleresposito@hotmail.com)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-blue?style=for-the-badge&logo=linkedin)]([https://www.linkedin.com/in/seu-usuario](https://linkedin.com/in/mulleresposito))
+[![Email](https://img.shields.io/badge/Email-red?style=for-the-badge&logo=gmail&logoColor=white)](mailto:mulleresposito@hotmail.com)
+
+Community
+
+[![Telegram](https://img.shields.io/badge/Telegram-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white)]([https://t.me/seu_usuario](https://t.me/starkoverflow))
 
