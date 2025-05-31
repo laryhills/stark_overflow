@@ -47,33 +47,8 @@ pub mod StarkOverflow {
   #[abi(embed_v0)]
   impl OwnableMixinImpl = OwnableComponent::OwnableMixinImpl<ContractState>;
   impl InternalImpl = OwnableComponent::InternalImpl<ContractState>;
-  impl ERC20Impl = ERC20Component::ERC20Impl<ContractState>;
-
-   
-  component!(path: ERC20Component, storage: erc20, event: ERC20Event);
-  component!(path: OwnableComponent, storage: ownable, event: OwnableEvent);
+  impl ERC20Impl = ERC20Component::ERC20Impl<ContractState>;   
   
-  #[abi(embed_v0)]
-  impl OwnableMixinImpl = OwnableComponent::OwnableMixinImpl<ContractState>;
-  impl InternalImpl = OwnableComponent::InternalImpl<ContractState>;
-  impl ERC20Impl = ERC20Component::ERC20Impl<ContractState>;
-
-   
-
-  #[event]
-  #[derive(Drop, starknet::Event)]
-  pub enum Event {
-    QuestionAnswered: QuestionAnswered,
-    QuestionStaked: QuestionStaked,
-    ChosenAnswer: ChosenAnswer,
-    ReputationAdded: ReputationAdded,
-    StakeStarted: StakeStarted,
-    StakeWithdrawn: StakeWithdrawn,
-    #[flat]
-    OwnableEvent: OwnableComponent::Event,
-    #[flat]
-    ERC20Event: ERC20Component::Event,
-  }
   #[event]
   #[derive(Drop, starknet::Event)]
   pub enum Event {
@@ -122,13 +97,6 @@ pub mod StarkOverflow {
 
     self.staking_rewards_rate.write(10000000000000000); // 0.01 tokens per second per token staked
   }
-  #[constructor]
-  fn constructor(ref self: ContractState, governance_token_address: ContractAddress) {
-    self.ownable.initializer(get_caller_address());
-    self.governance_token_dispatcher.write(IStarkOverflowTokenDispatcher { contract_address: governance_token_address});
-
-    self.staking_rewards_rate.write(10000000000000000); // 0.01 tokens per second per token staked
-  }
 
   #[abi(embed_v0)]
   impl StarkOverflow of super::IStarkOverflow<ContractState> {
@@ -144,25 +112,7 @@ pub mod StarkOverflow {
       
       question_id
     }
-  #[abi(embed_v0)]
-  impl StarkOverflow of super::IStarkOverflow<ContractState> {
-    fn ask_question(ref self: ContractState, description: ByteArray, value: u256) -> QuestionId {
-      let caller = get_caller_address();
-      let question_id = self.last_question_id.read() + 1;
-      let _question = Question { id: question_id, author: caller, description, value, status: QuestionStatus::Open };
-      
-      self.stake_on_question(question_id, value);
-      
-      self.questions.entry(question_id).write(_question);
-      self.last_question_id.write(question_id);
-      
-      question_id
-    }
 
-    fn get_question(self: @ContractState, question_id: u256) -> Question {
-      let found_question = self.questions.entry(question_id).read();
-      found_question
-    }
     fn get_question(self: @ContractState, question_id: u256) -> Question {
       let found_question = self.questions.entry(question_id).read();
       found_question
@@ -192,13 +142,7 @@ pub mod StarkOverflow {
 
       self.questions.entry(question_id).write(found_question);
     }
-      self.questions.entry(question_id).write(found_question);
-    }
 
-    fn submit_answer(ref self: ContractState, question_id: u256, description: ByteArray) -> AnswerId {
-      let caller = get_caller_address();
-      let answer_id = self.last_answer_id.read() + 1;
-      let answer = Answer { id: answer_id, author: caller, description, question_id };
     fn submit_answer(ref self: ContractState, question_id: u256, description: ByteArray) -> AnswerId {
       let caller = get_caller_address();
       let answer_id = self.last_answer_id.read() + 1;
@@ -220,29 +164,12 @@ pub mod StarkOverflow {
       
       answer_id
     }
-      // Emit event with all required fields
-      self.emit(QuestionAnswered { 
-        id: answer_id, 
-        question_id, 
-        answer_id, 
-        date: starknet::get_block_timestamp().into(), 
-      });
-      
-      answer_id
-    }
 
     fn get_answer(self: @ContractState, answer_id: u256) -> Answer {
       let found_answer = self.answers.entry(answer_id).read();
       found_answer
     }
-    fn get_answer(self: @ContractState, answer_id: u256) -> Answer {
-      let found_answer = self.answers.entry(answer_id).read();
-      found_answer
-    }
 
-    fn mark_answer_as_correct(ref self: ContractState, question_id: u256, answer_id: u256) {
-      let caller = get_caller_address();
-      let question_author = self.get_question(question_id).author;
     fn mark_answer_as_correct(ref self: ContractState, question_id: u256, answer_id: u256) {
       let caller = get_caller_address();
       let question_author = self.get_question(question_id).author;
