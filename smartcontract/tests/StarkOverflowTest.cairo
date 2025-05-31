@@ -23,12 +23,12 @@ fn it_should_be_able_to_ask_a_question() {
   ) = deployStarkOverflowContract();
 
   let starting_balance = starkoverflow_token_dispatcher.balance_of(starkoverflow_contract_address);
-  
+
   let description = "Question of test.";
   let value: u256 = 1 + EIGHTEEN_DECIMALS; // 1 STARK
-  
+
   approve_as_spender(asker, starkoverflow_contract_address, starkoverflow_token_dispatcher, value);
-  
+
   cheat_caller_address(starkoverflow_contract_address, asker, CheatSpan::TargetCalls(1));
   let question_id = starkoverflow_dispatcher.ask_question(description.clone(), value);
 
@@ -53,22 +53,22 @@ fn it_should_be_able_to_add_funds_to_a_question() {
     starkoverflow_token_dispatcher,
     starkoverflow_token_address
   ) = deployStarkOverflowContract();
-  
+
   let description = "Question of test.";
   let value = 50 + EIGHTEEN_DECIMALS; // 50 STARK
 
   approve_as_spender(asker, starkoverflow_contract_address, starkoverflow_token_dispatcher, value);
   cheat_caller_address(starkoverflow_contract_address, asker, CheatSpan::TargetCalls(1));
-  
+
   let question_id = starkoverflow_dispatcher.ask_question(description.clone(), value);
 
   cheat_caller_address(starkoverflow_token_address, asker, CheatSpan::TargetCalls(1));
   starkoverflow_token_dispatcher.mint(sponsor, 100 + EIGHTEEN_DECIMALS); // 100 STARK
   let additionally_funds = 50;
-  
+
   approve_as_spender(sponsor, starkoverflow_contract_address, starkoverflow_token_dispatcher, additionally_funds);
   cheat_caller_address(starkoverflow_contract_address, sponsor, CheatSpan::TargetCalls(1));
-  
+
   starkoverflow_dispatcher.add_funds_to_question(question_id, additionally_funds);
 
   let question = starkoverflow_dispatcher.get_question(question_id);
@@ -81,7 +81,7 @@ fn it_should_be_able_to_add_funds_to_a_question() {
 #[test]
 fn it_should_be_able_to_give_an_answer() {
   let asker = ADDRESSES::ASKER.get();
-  let responder = ADDRESSES::RESPONDER.get();
+  let responder = ADDRESSES::RESPONDER1.get();
 
   let (
     starkoverflow_dispatcher,
@@ -89,7 +89,7 @@ fn it_should_be_able_to_give_an_answer() {
     stark_token_dispatcher,
     _
   ) = deployStarkOverflowContract();
-  
+
   let question_description = "Question of test.";
   let value = 100;
 
@@ -111,8 +111,7 @@ fn it_should_be_able_to_give_an_answer() {
 #[test]
 fn it_should_be_able_to_mark_answer_as_correct() {
   let asker = ADDRESSES::ASKER.get();
-  let responder = ADDRESSES::RESPONDER.get();
-  let intruder = ADDRESSES::INTRUDER.get();
+  let responder = ADDRESSES::RESPONDER1.get();
 
   let (
     starkoverflow_dispatcher,
@@ -120,7 +119,6 @@ fn it_should_be_able_to_mark_answer_as_correct() {
     stark_token_dispatcher,
     _,
   ) = deployStarkOverflowContract();
-  let safe_dispatcher = IStarkOverflowSafeDispatcher { contract_address: starkoverflow_contract_address };
 
   cheat_caller_address(starkoverflow_contract_address, asker, CheatSpan::TargetCalls(1));
   let question_description = "Question of test marking answer as correct.";
@@ -131,28 +129,8 @@ fn it_should_be_able_to_mark_answer_as_correct() {
   cheat_caller_address(starkoverflow_contract_address, responder, CheatSpan::TargetCalls(1));
   let answer_description = "This is a test answer.";
   let answer_id = starkoverflow_dispatcher.submit_answer(question_id, answer_description.clone());
-
-  // Trying to tag an answer with a user who is not the author of the question and getting an error
-  cheat_caller_address(starkoverflow_contract_address, intruder, CheatSpan::TargetCalls(1));
-  match safe_dispatcher.mark_answer_as_correct(question_id, answer_id) {
-    Result::Ok(_) => panic!("It should not be allowed no one than the question author to mark the question as correct"),
-    Result::Err(panic_data) => {
-      let error_message = try_deserialize_bytearray_error(panic_data.span()).expect('wrong format');
-      assert_eq!(error_message, "Only the author of the question can mark the answer as correct", "Wrong error message received");
-    }
-  };
-
-  // Testing error: tries to mark a non-existent answer as correct
-  let inexistent_answer_id = 999;
-  cheat_caller_address(starkoverflow_contract_address, asker, CheatSpan::TargetCalls(2));
-  match safe_dispatcher.mark_answer_as_correct(question_id, inexistent_answer_id) {
-    Result::Ok(_) => panic!("It should not be able to mark a not related answer for a question"),
-    Result::Err(panic_data) => {
-      let error_message = try_deserialize_bytearray_error(panic_data.span()).expect('wrong format');
-      assert_eq!(error_message, "The specified answer does not exist for this question", "Wrong error message received");
-    }
-  };
-
+  
+  cheat_caller_address(starkoverflow_contract_address, asker, CheatSpan::TargetCalls(1));
   starkoverflow_dispatcher.mark_answer_as_correct(question_id, answer_id);
 
   let correct_answer_id = starkoverflow_dispatcher.get_correct_answer(question_id);
@@ -164,47 +142,133 @@ fn it_should_be_able_to_mark_answer_as_correct() {
   assert_eq!(starkoverflow_contract_balance, 0);
   assert_eq!(responder_balance, question_balance);
 }
-    
+
 #[test]
-fn test_token_basics() {
-  let (_dispatcher, _erc20) = deploy_mock_stark_token();
-  // Dummy test
-  assert(true, 'This test should pass');
+fn it_should_not_be_able_to_mark_a_non_existent_answer_as_correct() {
+  let asker = ADDRESSES::ASKER.get();
+
+  let (starkoverflow_dispatcher, starkoverflow_contract_address, stark_token_dispatcher, _) = deployStarkOverflowContract();
+  let starkoverflow_safe_dispatcher = IStarkOverflowSafeDispatcher { contract_address: starkoverflow_contract_address };
+
+  let question_description = "Question of test.";
+  let value = 100 + EIGHTEEN_DECIMALS; // 100 STARK
+
+  approve_as_spender(asker, starkoverflow_contract_address, stark_token_dispatcher, value);
+  cheat_caller_address(starkoverflow_contract_address, asker, CheatSpan::TargetCalls(1));
+  let question_id = starkoverflow_dispatcher.ask_question(question_description.clone(), value);
+
+  let inexistent_answer_id = 999;
+  cheat_caller_address(starkoverflow_contract_address, asker, CheatSpan::TargetCalls(1));
+  match starkoverflow_safe_dispatcher.mark_answer_as_correct(question_id, inexistent_answer_id) {
+    Result::Ok(_) => panic!("It should not be able to mark a not related answer for a question"),
+    Result::Err(panic_data) => {
+      let error_message = try_deserialize_bytearray_error(panic_data.span()).expect('wrong format');
+      assert_eq!(error_message, "The specified answer does not exist for this question", "Wrong error message received");
+    }
+  };
 }
-    
+
 #[test]
-fn test_transfer() {
-  let (_dispatcher, _erc20) = deploy_mock_stark_token();
-  // Dummy test
-  assert(true, 'This test should pass');
+fn it_should_not_be_able_to_tag_an_answer_as_correct_but_the_owner() {
+  let asker = ADDRESSES::ASKER.get();
+  let responder = ADDRESSES::RESPONDER1.get();
+  let intruder = ADDRESSES::INTRUDER.get();
+
+  let (starkoverflow_dispatcher, starkoverflow_contract_address, stark_token_dispatcher, _) = deployStarkOverflowContract();
+  let starkoverflow_safe_dispatcher = IStarkOverflowSafeDispatcher { contract_address: starkoverflow_contract_address };
+
+  cheat_caller_address(starkoverflow_contract_address, asker, CheatSpan::TargetCalls(1));
+  let question_description = "Question of test marking answer as correct.";
+  let question_value = 100 + EIGHTEEN_DECIMALS; // 100 STARK
+  approve_as_spender(asker, starkoverflow_contract_address, stark_token_dispatcher, question_value);
+  let question_id = starkoverflow_dispatcher.ask_question(question_description.clone(), question_value);
+
+  cheat_caller_address(starkoverflow_contract_address, responder, CheatSpan::TargetCalls(1));
+  let answer_description = "This is a test answer.";
+  let answer_id = starkoverflow_dispatcher.submit_answer(question_id, answer_description.clone());
+
+  cheat_caller_address(starkoverflow_contract_address, intruder, CheatSpan::TargetCalls(1));
+  match starkoverflow_safe_dispatcher.mark_answer_as_correct(question_id, answer_id) {
+    Result::Ok(_) => panic!("It should not be allowed no one than the question author to mark the question as correct"),
+    Result::Err(panic_data) => {
+      let error_message = try_deserialize_bytearray_error(panic_data.span()).expect('wrong format');
+      assert_eq!(error_message, "Only the author of the question can mark the answer as correct", "Wrong error message received");
+    }
+  }; 
 }
-    
+
 #[test]
-fn test_staking() {
+fn it_should_be_able_to_retrive_all_answers_for_a_question() {
+  let asker = ADDRESSES::ASKER.get();
+  let responder = ADDRESSES::RESPONDER1.get();
+
   let (
-    _starkoverflow_dispatcher,
-    _starkoverflow_contract_address, 
-    _starkoverflow_token_dispatcher,
+    starkoverflow_dispatcher,
+    starkoverflow_contract_address,
+    stark_token_dispatcher,
     _
   ) = deployStarkOverflowContract();
-  // Dummy test
-  assert(true, 'This test should pass');
+
+  let question_description = "Question of test.";
+  let value = 100 + EIGHTEEN_DECIMALS; // 100 STARK
+
+  approve_as_spender(asker, starkoverflow_contract_address, stark_token_dispatcher, value);
+  cheat_caller_address(starkoverflow_contract_address, asker, CheatSpan::TargetCalls(1));
+  let question_id = starkoverflow_dispatcher.ask_question(question_description.clone(), value);
+
+  cheat_caller_address(starkoverflow_contract_address, responder, CheatSpan::TargetCalls(1));
+
+  let answer_description_1 = "Answer of test.";
+  let answer_id_1 = starkoverflow_dispatcher.submit_answer(question_id, answer_description_1.clone());
+  let answer_description_2 = "Another answer of test.";
+  let answer_id_2 = starkoverflow_dispatcher.submit_answer(question_id, answer_description_2.clone());
+
+  let answers = starkoverflow_dispatcher.get_answers(question_id);
+
+  assert_eq!(answers.len(), 2);
+  assert_eq!(*answers.at(0).id, answer_id_1);
+  assert_eq!(answers.at(0).description, @answer_description_1);
+  assert_eq!(*answers.at(1).id, answer_id_2);
+  assert_eq!(answers.at(1).description, @answer_description_2);
 }
+
+#[test]
+fn it_should_return_a_void_array_for_when_no_answers() {
+    let (starkoverflow_dispatcher, starkoverflow_address, stark_token_dispatcher, _) = deployStarkOverflowContract();
+
+    let asker_address = ADDRESSES::ASKER.get();
+    let question_desc: ByteArray = "What if no one answers?";
+    let question_value: u256 = 10 * EIGHTEEN_DECIMALS;
+
+    approve_as_spender(asker_address, starkoverflow_address, stark_token_dispatcher, question_value);
     
+    cheat_caller_address(starkoverflow_address, asker_address, CheatSpan::TargetCalls(1));
+    let question_id = starkoverflow_dispatcher.ask_question(question_desc, question_value);
+
+    let answers = starkoverflow_dispatcher.get_answers(question_id);
+
+    assert(answers.len() == 0, 'Expected 0 answers');
+}
+
+#[test]
+fn it_should_not_be_able_to_retrieve_answers_for_a_non_existent_question() {
+  let (_, starkoverflow_contract_address, _, _) = deployStarkOverflowContract();
+  let starkoverflow_safe_dispatcher = IStarkOverflowSafeDispatcher { contract_address: starkoverflow_contract_address };
+
+  let non_existent_question_id: u256 = 999;
+
+  cheat_caller_address(starkoverflow_contract_address, ADDRESSES::ASKER.get(), CheatSpan::TargetCalls(1));
+  match starkoverflow_safe_dispatcher.get_answers(non_existent_question_id) {
+    Result::Ok(_) => panic!("It should not be able to retrieve answers for a non-existent question"),
+    Result::Err(panic_data) => {
+      let error_message = try_deserialize_bytearray_error(panic_data.span()).expect('wrong format');
+      assert_eq!(error_message, "Question does not exist", "Wrong error message received");
+    }
+  };
+}
+
 #[test]
 fn test_reputation() {
-  let (
-    _starkoverflow_dispatcher,
-    _starkoverflow_contract_address, 
-    _starkoverflow_token_dispatcher,
-    _
-  ) = deployStarkOverflowContract();
-  // Dummy test
-  assert(true, 'This test should pass');
-}
-    
-#[test]
-fn test_token_minting() {
   let (
     _starkoverflow_dispatcher,
     _starkoverflow_contract_address, 

@@ -10,6 +10,7 @@ pub trait IStarkOverflow<T> {
   fn add_funds_to_question(ref self: T, question_id: u256, value: u256);
   fn submit_answer(ref self: T, question_id: u256, description: ByteArray) -> AnswerId;
   fn get_answer(self: @T, answer_id: u256) -> Answer;
+  fn get_answers(self: @T, question_id: u256) -> Array<Answer>;
   fn mark_answer_as_correct(ref self: T, question_id: u256, answer_id: u256);
   fn get_correct_answer(self: @T, question_id: u256) -> AnswerId;
 
@@ -35,11 +36,20 @@ pub mod StarkOverflow {
   use super::{Question, Answer, QuestionStatus, QuestionId, AnswerId, IStarkOverflow};
   use super::{IStarkOverflowTokenDispatcher, IStarkOverflowTokenDispatcherTrait};
   use starknet::{get_caller_address, get_contract_address, ContractAddress};
-  use starknet::storage::{StoragePointerReadAccess, StoragePointerWriteAccess, StoragePathEntry, Map};
+  use starknet::storage::{StoragePointerReadAccess, StoragePointerWriteAccess, StoragePathEntry, Map, Vec, VecTrait, MutableVecTrait};
   use openzeppelin::access::ownable::OwnableComponent;
   use openzeppelin_token::erc20::{ERC20Component, ERC20HooksEmptyImpl};
   use stark_overflow::events::{QuestionAnswered, ChosenAnswer, QuestionStaked, ReputationAdded, StakeStarted, StakeWithdrawn};
 
+  component!(path: ERC20Component, storage: erc20, event: ERC20Event);
+  component!(path: OwnableComponent, storage: ownable, event: OwnableEvent);
+  
+  #[abi(embed_v0)]
+  impl OwnableMixinImpl = OwnableComponent::OwnableMixinImpl<ContractState>;
+  impl InternalImpl = OwnableComponent::InternalImpl<ContractState>;
+  impl ERC20Impl = ERC20Component::ERC20Impl<ContractState>;
+
+   
   component!(path: ERC20Component, storage: erc20, event: ERC20Event);
   component!(path: OwnableComponent, storage: ownable, event: OwnableEvent);
   
@@ -64,6 +74,20 @@ pub mod StarkOverflow {
     #[flat]
     ERC20Event: ERC20Component::Event,
   }
+  #[event]
+  #[derive(Drop, starknet::Event)]
+  pub enum Event {
+    QuestionAnswered: QuestionAnswered,
+    QuestionStaked: QuestionStaked,
+    ChosenAnswer: ChosenAnswer,
+    ReputationAdded: ReputationAdded,
+    StakeStarted: StakeStarted,
+    StakeWithdrawn: StakeWithdrawn,
+    #[flat]
+    OwnableEvent: OwnableComponent::Event,
+    #[flat]
+    ERC20Event: ERC20Component::Event,
+  }
 
   #[storage]
   struct Storage {
@@ -71,7 +95,8 @@ pub mod StarkOverflow {
     last_question_id: u256,
     answers: Map<u256, Answer>,
     last_answer_id: u256,
-    questionIdAnswerId: Map<u256, u256>,
+    question_id_answers_ids: Map<u256, Vec<u256>>,
+    question_id_chosen_answer_id: Map<u256, u256>,
     governance_token_dispatcher: IStarkOverflowTokenDispatcher,
 
     // Question staking storage
@@ -97,7 +122,28 @@ pub mod StarkOverflow {
 
     self.staking_rewards_rate.write(10000000000000000); // 0.01 tokens per second per token staked
   }
+  #[constructor]
+  fn constructor(ref self: ContractState, governance_token_address: ContractAddress) {
+    self.ownable.initializer(get_caller_address());
+    self.governance_token_dispatcher.write(IStarkOverflowTokenDispatcher { contract_address: governance_token_address});
 
+    self.staking_rewards_rate.write(10000000000000000); // 0.01 tokens per second per token staked
+  }
+
+  #[abi(embed_v0)]
+  impl StarkOverflow of super::IStarkOverflow<ContractState> {
+    fn ask_question(ref self: ContractState, description: ByteArray, value: u256) -> QuestionId {
+      let caller = get_caller_address();
+      let question_id = self.last_question_id.read() + 1;
+      let _question = Question { id: question_id, author: caller, description, value, status: QuestionStatus::Open };
+      
+      self.stake_on_question(question_id, value);
+      
+      self.questions.entry(question_id).write(_question);
+      self.last_question_id.write(question_id);
+      
+      question_id
+    }
   #[abi(embed_v0)]
   impl StarkOverflow of super::IStarkOverflow<ContractState> {
     fn ask_question(ref self: ContractState, description: ByteArray, value: u256) -> QuestionId {
@@ -117,6 +163,26 @@ pub mod StarkOverflow {
       let found_question = self.questions.entry(question_id).read();
       found_question
     }
+    fn get_question(self: @ContractState, question_id: u256) -> Question {
+      let found_question = self.questions.entry(question_id).read();
+      found_question
+    }
+
+    fn get_answers(self: @ContractState, question_id: u256) -> Array<Answer> {
+      let found_question = self.questions.entry(question_id).read();
+      assert!(found_question.id == question_id, "Question does not exist");
+
+      let mut answers = array![];
+      let answers_ids = self.question_id_answers_ids.entry(question_id);
+
+      for i in 0..answers_ids.len() {
+        let answer_id = answers_ids.at(i).read();
+        let answer = self.answers.entry(answer_id).read();
+        answers.append(answer);
+      };
+
+      answers
+    }
 
     fn add_funds_to_question(ref self: ContractState, question_id: u256, value: u256) {
       let mut found_question = self.questions.entry(question_id).read();
@@ -126,7 +192,13 @@ pub mod StarkOverflow {
 
       self.questions.entry(question_id).write(found_question);
     }
+      self.questions.entry(question_id).write(found_question);
+    }
 
+    fn submit_answer(ref self: ContractState, question_id: u256, description: ByteArray) -> AnswerId {
+      let caller = get_caller_address();
+      let answer_id = self.last_answer_id.read() + 1;
+      let answer = Answer { id: answer_id, author: caller, description, question_id };
     fn submit_answer(ref self: ContractState, question_id: u256, description: ByteArray) -> AnswerId {
       let caller = get_caller_address();
       let answer_id = self.last_answer_id.read() + 1;
@@ -135,6 +207,19 @@ pub mod StarkOverflow {
       self.answers.entry(answer_id).write(answer);
       self.last_answer_id.write(answer_id);
 
+      let answers_ids = self.question_id_answers_ids.entry(question_id);
+      answers_ids.append().write(answer_id);
+
+      // Emit event with all required fields
+      self.emit(QuestionAnswered { 
+        id: answer_id, 
+        question_id, 
+        answer_id, 
+        date: starknet::get_block_timestamp().into(), 
+      });
+      
+      answer_id
+    }
       // Emit event with all required fields
       self.emit(QuestionAnswered { 
         id: answer_id, 
@@ -150,21 +235,33 @@ pub mod StarkOverflow {
       let found_answer = self.answers.entry(answer_id).read();
       found_answer
     }
+    fn get_answer(self: @ContractState, answer_id: u256) -> Answer {
+      let found_answer = self.answers.entry(answer_id).read();
+      found_answer
+    }
 
+    fn mark_answer_as_correct(ref self: ContractState, question_id: u256, answer_id: u256) {
+      let caller = get_caller_address();
+      let question_author = self.get_question(question_id).author;
     fn mark_answer_as_correct(ref self: ContractState, question_id: u256, answer_id: u256) {
       let caller = get_caller_address();
       let question_author = self.get_question(question_id).author;
 
       assert!(caller == question_author, "Only the author of the question can mark the answer as correct");
+      assert!(caller == question_author, "Only the author of the question can mark the answer as correct");
 
+      let found_answer = self.get_answer(answer_id);
+      assert!(found_answer.question_id == question_id, "The specified answer does not exist for this question");
       let found_answer = self.get_answer(answer_id);
       assert!(found_answer.question_id == question_id, "The specified answer does not exist for this question");
 
       let found_question = self.questions.entry(question_id).read();
       assert!(found_question.status == QuestionStatus::Open, "The question is already resolved");
+      let found_question = self.questions.entry(question_id).read();
+      assert!(found_question.status == QuestionStatus::Open, "The question is already resolved");
 
       self.questions.entry(question_id).write(Question { status: QuestionStatus::Resolved, ..found_question });
-      self.questionIdAnswerId.entry(question_id).write(answer_id);
+      self.question_id_chosen_answer_id.entry(question_id).write(answer_id);
       
       // Emit event with all required fields
       self.emit(ChosenAnswer { 
@@ -180,8 +277,8 @@ pub mod StarkOverflow {
     }
 
     fn get_correct_answer(self: @ContractState, question_id: u256) -> AnswerId {
-      let found_corret_answer_id = self.questionIdAnswerId.entry(question_id).read();
-      found_corret_answer_id
+      let found_correct_answer_id = self.question_id_chosen_answer_id.entry(question_id).read();
+      found_correct_answer_id
     }
       
     fn stake_on_question(ref self: ContractState, question_id: u256, amount: u256) {
