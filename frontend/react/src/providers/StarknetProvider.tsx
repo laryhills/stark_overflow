@@ -1,14 +1,27 @@
 "use client";
 import React from "react";
-import { mainnet } from "@starknet-react/chains";
+import { mainnet, sepolia, Chain } from "@starknet-react/chains";
 import {
   StarknetConfig,
-  publicProvider,
   argent,
   braavos,
   useInjectedConnectors,
   starkscan,
+  publicProvider,
+  jsonRpcProvider
 } from "@starknet-react/core";
+
+
+
+
+function rpc(chain: Chain) {
+  return {
+    nodeUrl: `https://starknet-${chain.network}.blastapi.io/0982a714-5c66-4d43-a2a5-5f5929deb867`
+  }
+}
+const provider = jsonRpcProvider({
+  rpc: rpc
+});
 
 export function StarknetProvider({ children }: { children: React.ReactNode }) {
   const { connectors } = useInjectedConnectors({
@@ -19,8 +32,8 @@ export function StarknetProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <StarknetConfig
-      chains={[mainnet]}
-      provider={publicProvider()}
+      chains={[mainnet,sepolia]}
+      provider={provider}
       connectors={connectors}
       explorer={starkscan}
       autoConnect={true} // Enable auto-connect

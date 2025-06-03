@@ -23,7 +23,7 @@ export function Forum() {
 
   const initialTopics = [
     {
-      id: "q1",
+      id: "1",
       avatar: "https://avatars.githubusercontent.com/u/62848833?v=4",
       title: "Unit tests in components that use Design System",
       author: "Maicon Domingues",
@@ -32,7 +32,7 @@ export function Forum() {
       state: "open",
     },
     {
-      id: "q2",
+      id: "2",
       avatar: "https://avatars.githubusercontent.com/u/62848833?v=4",
       title: "[Tip] Carousel with Keen-Slider",
       author: "Jordane Chaves Ferreira Rocha",
@@ -41,7 +41,7 @@ export function Forum() {
       state: "closed",
     },
     {
-      id: "q3",
+      id: "3",
       avatar: "https://avatars.githubusercontent.com/u/62848833?v=4",
       title: "Tests with Jest and React Testing Library",
       author: "Vitor Antonio Danner da Silva",
@@ -50,7 +50,7 @@ export function Forum() {
       state: "open",
     },
     {
-      id: "q4",
+      id: "4",
       avatar: "https://avatars.githubusercontent.com/u/62848833?v=4",
       title: "I'm facing problems on Github",
       author: "Jhane Doe",
