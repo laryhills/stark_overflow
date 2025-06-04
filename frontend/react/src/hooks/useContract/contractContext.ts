@@ -4,8 +4,9 @@ import { useContract as useStarknetContract } from "@starknet-react/core"
 interface ContractContextType {
   contract: ReturnType<typeof useStarknetContract>['contract']
   contractReady: boolean
-  isConnected: boolean
+  isConnected: boolean | undefined
   address: string | undefined
+  abiError: string | undefined
 }
 
 export const ContractContext = createContext<ContractContextType | undefined>(undefined)

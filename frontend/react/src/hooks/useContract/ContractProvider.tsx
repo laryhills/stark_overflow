@@ -1,4 +1,4 @@
-import React, { useState, useEffect, ReactNode } from 'react'
+import { useState, useEffect, ReactNode, useMemo } from 'react'
 import { useProvider, useAccount, useContract as useStarknetContract } from "@starknet-react/core"
 import { CONTRACT_ADDRESS } from "../../services/contract"
 import type { Abi } from "starknet"
@@ -12,7 +12,8 @@ export function ContractProvider({ children }: ContractProviderProps) {
   const { provider } = useProvider()
   const { isConnected, address } = useAccount()
   const [abi, setAbi] = useState<Abi | undefined>(undefined)
-  
+  const [abiError, setAbiError] = useState("")
+
   const { contract } = useStarknetContract({ abi, address: CONTRACT_ADDRESS })
 
   // Fetch ABI once when address is available
@@ -20,10 +21,14 @@ export function ContractProvider({ children }: ContractProviderProps) {
     let isMounted = true
 
     async function getAbi() {
-      if (!provider || !address) return
-      
+      if (!provider) return
+
       console.log("Fetching ABI...")
       try {
+        if (!CONTRACT_ADDRESS) {
+          setAbiError("CONTRACT_ADDRESS is not defined")
+          return
+        }
         const classInfo = await provider.getClassAt(CONTRACT_ADDRESS)
         if (isMounted) {
           setAbi(classInfo.abi as Abi)
@@ -31,24 +36,24 @@ export function ContractProvider({ children }: ContractProviderProps) {
         }
       } catch (error) {
         console.error("Error fetching ABI:", error)
+        setAbiError(error instanceof Error ? error.message : "Unknown abi error")
       }
     }
 
-    if (address && provider) {
-      getAbi()
-    }
+    getAbi()
 
     return () => {
       isMounted = false
     }
-  }, [address, provider])
+  }, [provider])
 
-  const contextValue = {
+  const contextValue = useMemo(() => ({
     contract,
     contractReady: !!contract,
-    isConnected: !!isConnected,
-    address
-  }
+    isConnected,
+    address,
+    abiError
+  }), [contract, isConnected, address, abiError])
 
   return (
     <ContractContext.Provider value={contextValue}>

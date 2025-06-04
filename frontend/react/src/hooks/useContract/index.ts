@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useState } from "react"
+import { useState, useCallback } from "react"
 import { useAccount } from "@starknet-react/core"
 import { ContractAnswer, ContractQuestion } from "../../services/contract"
 import { contractQuestionToFrontend, contractAnswerToFrontend } from "../../utils/contractTypeMapping"
@@ -16,7 +16,7 @@ interface ContractState {
 
 export function useContract() {
   const { isConnected } = useAccount()
-  const { contract, contractReady } = useContractContext()
+  const { contract, contractReady, abiError } = useContractContext()
 
   const [questionState, setQuestionState] = useState<ContractState>({
     isLoading: false,
@@ -33,9 +33,9 @@ export function useContract() {
 
 
   // Fetch question from contract
-  const fetchQuestion = async (questionId: string): Promise<Question | null> => {
-    if (!contract) {
-      setQuestionState({ isLoading: false, error: "Contract not initialized / Wallet not connected", transactionHash: null })
+  const fetchQuestion = useCallback(async (questionId: string): Promise<Question | null> => {
+    if (!contract || abiError) {
+      setQuestionState({ isLoading: false, error: abiError || "Contract not initialized / Wallet not connected", transactionHash: null })
       return null
     }
 
@@ -60,12 +60,12 @@ export function useContract() {
       setQuestionState({ isLoading: false, error: errorMessage, transactionHash: null })
       return null
     }
-  }
+  }, [contract, abiError])
 
   // Fetch answers for a question
-  const fetchAnswers = async (questionId: string): Promise<Answer[]> => {
-    if (!contract) {
-      setAnswersState({ isLoading: false, error: "Contract not initialized / Wallet not connected", transactionHash: null })
+  const fetchAnswers = useCallback(async (questionId: string): Promise<Answer[]> => {
+    if (!contract || abiError) {
+      setAnswersState({ isLoading: false, error: abiError || "Contract not initialized / Wallet not connected", transactionHash: null })
       return []
     }
 
@@ -73,7 +73,7 @@ export function useContract() {
 
     try {
       const [contractAnswers, correctAnswerId] = await Promise.all([
-        contract.get_answers(formatters.numberToBigInt(Number(questionId))) as Promise<any[]>,
+        contract.get_answers(formatters.numberToBigInt(Number(questionId))) as Promise<ContractAnswer[]>,
         contract.get_correct_answer(formatters.numberToBigInt(Number(questionId))).catch(() => BigInt(0)) as Promise<bigint>
       ])
 
@@ -91,13 +91,13 @@ export function useContract() {
       setAnswersState({ isLoading: false, error: errorMessage, transactionHash: null })
       return []
     }
-  }
+  }, [contract, abiError])
 
 
 
   // Clear errors
-  const clearQuestionError = () => setQuestionState(prev => ({ ...prev, error: null }))
-  const clearAnswersError = () => setAnswersState(prev => ({ ...prev, error: null }))
+  const clearQuestionError = useCallback(() => setQuestionState(prev => ({ ...prev, error: null })), [])
+  const clearAnswersError = useCallback(() => setAnswersState(prev => ({ ...prev, error: null })), [])
 
   return {
     // Question fetching
