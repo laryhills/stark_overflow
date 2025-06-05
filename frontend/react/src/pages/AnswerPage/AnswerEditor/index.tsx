@@ -1,8 +1,7 @@
 "use client"
 
 import React from "react"
-
-import { useState, useRef, useContext } from "react"
+import { useState, useRef, useContext, Suspense } from "react"
 import { useAccount, useSendTransaction } from "@starknet-react/core"
 import { Code, FileArrowUp, Image, Link as LinkIcon, TextBolder, TextItalic, X } from "phosphor-react"
 import {
@@ -372,9 +371,11 @@ export function AnswerEditor({ questionId }: AnswerEditorProps) {
       ) : (
         <EditorPreview>
           {content ? (
-            <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
-              {content}
-            </ReactMarkdown>
+            <Suspense fallback={<p>Carregando visualização...</p>}>
+              <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
+                {content}
+              </ReactMarkdown>
+          </Suspense>
           ) : (
             <p className="empty-preview">Your preview will appear here...</p>
           )}
