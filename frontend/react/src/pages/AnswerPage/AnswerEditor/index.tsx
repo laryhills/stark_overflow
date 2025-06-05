@@ -3,7 +3,7 @@
 import React from "react"
 
 import { useState, useRef, useContext } from "react"
-import { useAccount } from "@starknet-react/core"
+import { useAccount, useSendTransaction } from "@starknet-react/core"
 import { Code, FileArrowUp, Image, Link as LinkIcon, TextBolder, TextItalic, X } from "phosphor-react"
 import {
   EditorContainer,
@@ -22,10 +22,13 @@ import {
   RemoveFileButton,
 } from "./styles"
 import { AnswersContext } from "../providers/AnswersProvider/answersContext"
-
 import { shortenAddress } from "@utils/shortenAddress"
 import { useWallet } from "@hooks/useWallet"
 import { useStatusMessage } from "@hooks/useStatusMessage"
+import { NavLink } from "react-router-dom"
+import { formatters } from "@utils/formatters"
+import { useContract } from "@hooks/useContract"
+
 
 // Import dynamic components for markdown rendering
 const ReactMarkdown = React.lazy(() => import("react-markdown"))
@@ -46,10 +49,15 @@ const uploadFile = async (file: File): Promise<{ id: string; url: string; name: 
   })
 }
 
-export function AnswerEditor() {
+interface AnswerEditorProps {
+  questionId: string;
+}
+
+export function AnswerEditor({ questionId }: AnswerEditorProps) {
   const [content, setContent] = useState("")
   const [activeTab, setActiveTab] = useState<"write" | "preview">("write")
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [transactionHash, setTransactionHash] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const textAreaRef = useRef<HTMLTextAreaElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -63,6 +71,9 @@ export function AnswerEditor() {
   const { openConnectModal } = useWallet()
   const { answers, setAnswers } = useContext(AnswersContext)
   const { setStatusMessage } = useStatusMessage()
+
+  const { contract } = useContract()
+
 
   // Handle tab switching
   const handleTabChange = (tab: "write" | "preview") => {
@@ -192,6 +203,21 @@ export function AnswerEditor() {
     }, 5000)
   }
 
+  // send submit request
+    const { sendAsync, error: sendError } = useSendTransaction({
+      calls:
+        contract && address && content.trim() && questionId && isConnected
+          ? [
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            //@ts-expect-error
+            contract.populate("submit_answer", [formatters.numberToBigInt(Number(questionId)), content])
+
+          ]
+          : undefined,
+    })
+
+
+
   // Handle answer submission
   const handleSubmit = async () => {
     // Validate content
@@ -210,19 +236,38 @@ export function AnswerEditor() {
     setError(null)
 
     try {
-      // In a real app, this would be a blockchain transaction or API call
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+      // Submit answer to contract
+      const response = await sendAsync()
 
-      // Call the callback with the answer content
-      onAnswerSubmitted(content)
+      setTransactionHash(response.transaction_hash)
+      
+      if (response.transaction_hash && !sendError) {
+        // Show success message
+        setTimeout(() => {
+        setStatusMessage({
+          type: "success",
+          message: response.transaction_hash 
+            ? `Answer submitted successfully! Transaction: ${response.transaction_hash}`
+            : "Answer submitted successfully!",
+        })})
 
-      // Reset the form
-      setContent("")
-      setActiveTab("write")
-      setUploadedFiles([])
+        // Reset the form
+        setContent("")
+        setActiveTab("write")
+        setUploadedFiles([])
+        
+        // Clear success message after 5 seconds
+        setTimeout(() => {
+          setStatusMessage({ type: null, message: "" })
+          onAnswerSubmitted(content)
+        }, 5000)
+      } else {
+        // Handle submission failure
+        setError(sendError ? sendError.message : "Failed to submit answer. Please try again.")
+      } 
     } catch (err) {
       console.error("Error submitting answer:", err)
-      setError("Failed to submit answer. Please try again.")
+      setError("Failed to submit answer. Please try again")
     } finally {
       setIsSubmitting(false)
     }
@@ -338,8 +383,15 @@ export function AnswerEditor() {
 
       {error && <ErrorMessage>{error}</ErrorMessage>}
 
-      <SubmitButton onClick={handleSubmit} disabled={isSubmitting}>
+      <SubmitButton onClick={handleSubmit} disabled={isSubmitting }>
         {isSubmitting ? "Submitting..." : "Submit Answer"}
+        {transactionHash && (
+          <span>
+            <NavLink to={`https://starkscan.io/tx/${transactionHash}`} target="_blank" rel="noopener noreferrer">
+              View on Starkscan
+            </NavLink>
+          </span>
+        )}
       </SubmitButton>
     </EditorContainer>
   )
