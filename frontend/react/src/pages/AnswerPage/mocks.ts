@@ -1,6 +1,6 @@
 // Mock data for the question
 export const mockQuestion = {
-  id: "q1",
+  id: "1",
   title: "I'm facing problems on Github",
   content: `Good afternoon, alright?
 
