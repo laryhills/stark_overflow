@@ -26,6 +26,12 @@ export function ContractProvider({ children }: ContractProviderProps) {
     transactionHash: null
   })
 
+  const [markCorrectState, setMarkCorrectState] = useState<ContractState>({
+    isLoading: false,
+    error: null,
+    transactionHash: null
+  })
+
   const { contract } = useContract<typeof StarkOverflowABI>({ abi: StarkOverflowABI, address: import.meta.env.VITE_CONTRACT_ADDRESS })
 
   const fetchQuestion = useCallback(async (questionId: number): Promise<Question | null> => {
@@ -87,6 +93,53 @@ export function ContractProvider({ children }: ContractProviderProps) {
   const clearQuestionError = () => setQuestionState(prev => ({ ...prev, error: null }))
   const clearAnswersError = () => setAnswersState(prev => ({ ...prev, error: null }))
 
+  const markAnswerAsCorrect = useCallback(async (questionId: string, answerId: string): Promise<boolean> => {
+    if (!contract || !isConnected) {
+      setMarkCorrectState({
+        isLoading: false,
+        error: "Contract not initialized or wallet not connected",
+        transactionHash: null
+      })
+      return false
+    }
+
+    setMarkCorrectState({ isLoading: true, error: null, transactionHash: null })
+
+    try {
+      const questionIdBigInt = formatters.numberToBigInt(Number(questionId))
+      const answerIdBigInt = formatters.numberToBigInt(Number(answerId))
+
+      const result = await contract.mark_answer_as_correct(questionIdBigInt, answerIdBigInt)
+
+      setMarkCorrectState({
+        isLoading: false,
+        error: null,
+        transactionHash: result?.transaction_hash || null
+      })
+
+      return true
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Failed to mark answer as correct"
+      setMarkCorrectState({ isLoading: false, error: errorMessage, transactionHash: null })
+      return false
+    }
+  }, [contract, isConnected])
+
+  // Check if an answer has already been marked as correct for a question
+  const getCorrectAnswer = useCallback(async (questionId: string): Promise<string | null> => {
+    if (!contract) {
+      return null
+    }
+
+    try {
+      const result = await contract.get_correct_answer(formatters.numberToBigInt(Number(questionId))) as bigint
+      return result && result !== BigInt(0) ? result.toString() : null
+    } catch (error) {
+      console.error("Error fetching correct answer:", error)
+      return null
+    }
+  }, [contract])
+
   return (
     <ContractContext.Provider value={{
       contract,
@@ -97,10 +150,14 @@ export function ContractProvider({ children }: ContractProviderProps) {
       answersLoading: answersState.isLoading,
       questionError: questionState.error,
       answersError: answersState.error,
+      markCorrectLoading: markCorrectState.isLoading,
+      markCorrectError: markCorrectState.error,
       fetchQuestion,
       fetchAnswers,
       clearQuestionError,
-      clearAnswersError
+      clearAnswersError,
+      markAnswerAsCorrect,
+      getCorrectAnswer
     }}>
       {children}
     </ContractContext.Provider>
