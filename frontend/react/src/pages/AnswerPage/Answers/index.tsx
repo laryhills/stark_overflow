@@ -24,13 +24,11 @@ interface AnswersProps {
 export function Answers({ question, setQuestion }: AnswersProps) {
   const [sortBy, setSortBy] = useState<"votes" | "date">("votes")
   const [currentPage, setCurrentPage] = useState(1)
-  const [userVotes, setUserVotes] = useState<Record<string, "up" | "down" | null>>({})
-  const [isVoting, setIsVoting] = useState<Record<string, boolean>>({})
   const { isConnected, address } = useAccount()
   const { openConnectModal } = useWallet()
   const { answers, setAnswers } = useContext(AnswersContext)
   const { setStatusMessage } = useStatusMessage()
-  const { markAnswerAsCorrect, markCorrectLoading, voteAnswer } = useContract()
+  const { markAnswerAsCorrect } = useContract()
 
   // Sort answers based on selected option
   const sortedAnswers = [...answers].sort((a, b) => {
@@ -135,92 +133,17 @@ export function Answers({ question, setQuestion }: AnswersProps) {
       return
     }
 
-    // Check if user has already voted on this answer
-    const currentVote = userVotes[answerId]
-
-    // Prevent voting if user is trying to vote in the same direction again
-    if (currentVote === direction) {
-      setStatusMessage({
-        type: "info",
-        message: `You have already ${direction === "up" ? "upvoted" : "downvoted"} this answer.`,
-      })
-      return
-    }
-
-    setIsVoting(prev => ({ ...prev, [answerId]: true }))
-    setStatusMessage({ type: "info", message: "Processing vote..." })
-
-    try {
-      const isUpvote = direction === "up"
-
-      // Call the smart contract voting function
-      const success = await voteAnswer(question.id, answerId, isUpvote)
-
-      if (success) {
-        // Update local state optimistically
-        setAnswers(
-          answers.map((answer) => {
-            if (answer.id === answerId) {
-              let newVotes = answer.votes
-
-              // Handle vote changes
-              if (currentVote === "up" && direction === "down") {
-                newVotes -= 2 // Remove upvote and add downvote
-              } else if (currentVote === "down" && direction === "up") {
-                newVotes += 2 // Remove downvote and add upvote
-              } else if (direction === "up") {
-                newVotes += 1 // New upvote
-              } else {
-                newVotes -= 1 // New downvote
-              }
-
-              return {
-                ...answer,
-                votes: newVotes,
-              }
-            }
-            return answer
-          }),
-        )
-
-        // Update user vote state
-        setUserVotes(prev => ({
-          ...prev,
-          [answerId]: direction,
-        }))
-
-        setStatusMessage({
-          type: "success",
-          message: "Vote submitted successfully to the blockchain!",
-        })
-      }
-    } catch (error) {
-      console.error("Vote error:", error)
-
-      let errorMessage = "Failed to submit vote. Please try again."
-
-      // Handle specific contract errors
-      if (error instanceof Error) {
-        if (error.message.includes("User has already voted this way")) {
-          errorMessage = `You have already ${direction === "up" ? "upvoted" : "downvoted"} this answer.`
-        } else if (error.message.includes("Cannot vote on your own answer")) {
-          errorMessage = "You cannot vote on your own answer."
-        } else if (error.message.includes("Answer does not exist")) {
-          errorMessage = "This answer no longer exists."
+    setAnswers(
+      answers.map((answer) => {
+        if (answer.id === answerId) {
+          return {
+            ...answer,
+            votes: direction === "up" ? answer.votes + 1 : answer.votes - 1,
+          }
         }
-      }
-
-      setStatusMessage({
-        type: "error",
-        message: errorMessage,
-      })
-    } finally {
-      setIsVoting(prev => ({ ...prev, [answerId]: false }))
-      // Clear status message after 5 seconds
-      setTimeout(() => {
-        setStatusMessage({ type: null, message: "" })
-      }, 5000)
-    }
+        return answer
+      }),
+    )
   }
 
   // Check if current user is the question author
@@ -278,35 +201,20 @@ export function Answers({ question, setQuestion }: AnswersProps) {
                     {answer.content}
                   </ReactMarkdown>
                 </Suspense>
-              </AnswerContent>              <AnswerFooter>
-                <VoteContainer>                  <VoteButton
-                  onClick={() => handleVote(answer.id, "up")}
-                  disabled={isVoting[answer.id]}
-                  style={{
-                    color: userVotes[answer.id] === "up" ? "#2ecc71" : "#666",
-                    opacity: isVoting[answer.id] ? 0.5 : 1
-                  }}
-                >
-                  <ThumbsUp size={16} />
-                </VoteButton>
-                  <VoteCount style={{ fontWeight: "bold" }}>{answer.votes}</VoteCount>
-                  <VoteButton
-                    onClick={() => handleVote(answer.id, "down")}
-                    disabled={isVoting[answer.id]}
-                    style={{
-                      color: userVotes[answer.id] === "down" ? "#e74c3c" : "#666",
-                      opacity: isVoting[answer.id] ? 0.5 : 1
-                    }}
-                  >
+              </AnswerContent>
+              <AnswerFooter>
+                <VoteContainer>
+                  <VoteButton onClick={() => handleVote(answer.id, "up")}>
+                    <ThumbsUp size={16} />
+                  </VoteButton>
+                  <VoteCount>{answer.votes}</VoteCount>
+                  <VoteButton onClick={() => handleVote(answer.id, "down")}>
                     <ThumbsDown size={16} />
                   </VoteButton>
-                </VoteContainer>                {isQuestionAuthor && question.isOpen && !answer.isCorrect && (
-                  <MarkCorrectButton
-                    onClick={() => handleMarkCorrect(answer.id)}
-                    disabled={markCorrectLoading}
-                  >
-                    {markCorrectLoading ? "Processing..." : "Mark as Correct"}
-                  </MarkCorrectButton>
+                </VoteContainer>
+
+                {isQuestionAuthor && question.isOpen && !answer.isCorrect && (
+                  <MarkCorrectButton onClick={() => handleMarkCorrect(answer.id)}>Mark as Correct</MarkCorrectButton>
                 )}
               </AnswerFooter>
               <AnswerDivider />

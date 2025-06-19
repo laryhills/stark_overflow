@@ -13,11 +13,6 @@ pub trait IStarkOverflow<T> {
   fn get_answers(self: @T, question_id: u256) -> Array<Answer>;  fn mark_answer_as_correct(ref self: T, question_id: u256, answer_id: u256);
   fn get_correct_answer(self: @T, question_id: u256) -> AnswerId;
 
-  // Answer voting functions
-  fn vote_answer(ref self: T, question_id: u256, answer_id: u256, is_upvote: bool);
-  fn get_answer_votes(self: @T, answer_id: u256) -> (u256, u256); // (upvotes, downvotes)
-  fn get_user_vote(self: @T, user: ContractAddress, answer_id: u256) -> u8; // 0: no vote, 1: upvote, 2: downvote
-
   // Question staking functions
   fn stake_on_question(ref self: T, question_id: u256, amount: u256);
   fn get_total_staked_on_question(self: @T, question_id: u256) -> u256;
@@ -43,7 +38,7 @@ pub mod StarkOverflow {
   use starknet::storage::{StoragePointerReadAccess, StoragePointerWriteAccess, StoragePathEntry, Map, Vec, VecTrait, MutableVecTrait};
   use openzeppelin::access::ownable::OwnableComponent;
   use openzeppelin_token::erc20::{ERC20Component, ERC20HooksEmptyImpl};
-  use stark_overflow::events::{QuestionAnswered, ChosenAnswer, QuestionStaked, ReputationAdded, StakeStarted, StakeWithdrawn, AnswerVoted};
+  use stark_overflow::events::{QuestionAnswered, ChosenAnswer, QuestionStaked, ReputationAdded, StakeStarted, StakeWithdrawn};
 
   component!(path: ERC20Component, storage: erc20, event: ERC20Event);
   component!(path: OwnableComponent, storage: ownable, event: OwnableEvent);
@@ -59,7 +54,6 @@ pub mod StarkOverflow {
     QuestionStaked: QuestionStaked,
     ChosenAnswer: ChosenAnswer,
     ReputationAdded: ReputationAdded,
-    AnswerVoted: AnswerVoted,
     StakeStarted: StakeStarted,
     StakeWithdrawn: StakeWithdrawn,
     #[flat]
@@ -76,11 +70,6 @@ pub mod StarkOverflow {
     last_answer_id: u256,
     question_id_answers_ids: Map<u256, Vec<u256>>,    question_id_chosen_answer_id: Map<u256, u256>,
     governance_token_dispatcher: IStarkOverflowTokenDispatcher,
-
-    // Answer voting storage
-    answer_upvotes: Map<u256, u256>, // answer_id -> upvote count
-    answer_downvotes: Map<u256, u256>, // answer_id -> downvote count
-    user_votes: Map<(ContractAddress, u256), u8>, // (user, answer_id) -> vote type (0: no vote, 1: upvote, 2: downvote)
 
     // Question staking storage
     question_stakes: Map<(ContractAddress, u256), u256>, // (user, question_id) -> amount
@@ -327,72 +316,15 @@ pub mod StarkOverflow {
       let reward = (staked_amount * rate * duration_u256) / 1000000000000000000;
 
       reward
-    }    fn get_stake_info(self: @ContractState, staker: ContractAddress) -> (u256, u64, u256) {
+    }    
+    
+    fn get_stake_info(self: @ContractState, staker: ContractAddress) -> (u256, u64, u256) {
       let staked_amount = self.staked_balances.read(staker);
       let start_time = self.staking_start_time.read(staker);
       let rewards = self.get_claimable_rewards(staker);
 
       (staked_amount, start_time, rewards)
     }
-
-    // Answer voting functions
-    fn vote_answer(ref self: ContractState, question_id: u256, answer_id: u256, is_upvote: bool) {
-      let caller = get_caller_address();
-      
-      // Check if the answer exists and belongs to the question
-      let answer = self.answers.read(answer_id);
-      assert(answer.id != 0, 'Answer does not exist');
-      assert(answer.question_id == question_id, 'Answer does not belong to this question');
-      
-      // Check if user is trying to vote on their own answer
-      assert(answer.author != caller, 'Cannot vote on your own answer');
-      
-      let previous_vote = self.user_votes.read((caller, answer_id));
-      let new_vote = if is_upvote { 1_u8 } else { 2_u8 };
-      
-      // If user already voted the same way, do nothing
-      assert(previous_vote != new_vote, 'User has already voted this way');
-      
-      // Update vote counts
-      if previous_vote == 1_u8 { // Was upvote, remove it
-        let current_upvotes = self.answer_upvotes.read(answer_id);
-        self.answer_upvotes.write(answer_id, current_upvotes - 1);
-      } else if previous_vote == 2_u8 { // Was downvote, remove it
-        let current_downvotes = self.answer_downvotes.read(answer_id);
-        self.answer_downvotes.write(answer_id, current_downvotes - 1);
-      }
-      
-      // Add new vote
-      if is_upvote {
-        let current_upvotes = self.answer_upvotes.read(answer_id);
-        self.answer_upvotes.write(answer_id, current_upvotes + 1);
-      } else {
-        let current_downvotes = self.answer_downvotes.read(answer_id);
-        self.answer_downvotes.write(answer_id, current_downvotes + 1);
-      }
-      
-      // Record user's vote
-      self.user_votes.write((caller, answer_id), new_vote);
-      
-      // Emit event
-      self.emit(AnswerVoted { 
-        voter: caller, 
-        answer_id, 
-        question_id, 
-        is_upvote, 
-        previous_vote 
-      });
-    }
-    
-    fn get_answer_votes(self: @ContractState, answer_id: u256) -> (u256, u256) {
-      let upvotes = self.answer_upvotes.read(answer_id);
-      let downvotes = self.answer_downvotes.read(answer_id);
-      (upvotes, downvotes)
-    }
-    
-    fn get_user_vote(self: @ContractState, user: ContractAddress, answer_id: u256) -> u8 {
-      self.user_votes.read((user, answer_id))
-    }   
   }
   
   #[generate_trait]
