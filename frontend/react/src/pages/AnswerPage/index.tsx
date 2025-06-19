@@ -7,15 +7,16 @@ import { StakeModal } from "./StakeModal"
 import { Question } from "./Question"
 import { Answers } from "./Answers"
 
-import { AnswersProvider } from "./providers/AnswersProvider"
-import { StakingProvider } from "./providers/StakingProvider"
-import { ContractProvider } from "@hooks/useContract/ContractProvider"
+import { AnswersProvider } from "./hooks/useAnswers/answersProvider"
+import { StakingProvider } from "./hooks/useStaking/staking.provider"
+import { ContractProvider } from "@hooks/useContract/contract.provider"
 
 import { QuestionDetailContainer, StatusMessage } from "./styles"
 import { useStatusMessage } from "@hooks/useStatusMessage"
 import { useContract } from "@hooks/useContract"
-import { Question as QuestionType } from "./types"
+import { Question as QuestionType } from "@app-types/index"
 import { useAccount } from "@starknet-react/core"
+import { AnswerEditorProvider } from "./AnswerEditor/useAnswerEditor/answerEditor.provider"
 
 export function AnswerPage() {
   return (
@@ -26,7 +27,8 @@ export function AnswerPage() {
 }
 
 function AnswerPageContent() {
-  const { questionId } = useParams<{ questionId: string }>()
+  const params = useParams<{ questionId: string }>()
+  const questionId = Number(params.questionId)
   const { statusMessage } = useStatusMessage()
   const { isConnected } = useAccount()
 
@@ -44,8 +46,6 @@ function AnswerPageContent() {
   // Fetch question data from contract
   useEffect(() => {
     if (questionId && contractReady) {
-      console.log(`Fetching question with ID: ${questionId}`)
-
       const loadQuestion = async () => {
         const contractQuestion = await fetchQuestion(questionId)
         if (contractQuestion) {
@@ -107,10 +107,14 @@ function AnswerPageContent() {
       <StakingProvider>
         <Question question={question} />
 
-        <AnswersProvider questionId={questionId || ""}>
+        <AnswersProvider questionId={questionId}>
           <Answers question={question} setQuestion={setQuestion} />
 
-          {question.isOpen && <AnswerEditor questionId={questionId || ""} />}
+          {question.isOpen && (
+            <AnswerEditorProvider>
+              <AnswerEditor questionId={questionId} />
+            </AnswerEditorProvider>
+          )}
         </AnswersProvider>
         
         {statusMessage?.type && (

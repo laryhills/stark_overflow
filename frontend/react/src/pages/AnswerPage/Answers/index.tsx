@@ -6,9 +6,9 @@ import { useContext, useState, Suspense } from "react"
 import { useAccount } from "@starknet-react/core"
 import { shortenAddress } from "@utils/shortenAddress"
 
-import { AnswersContext } from "../providers/AnswersProvider/answersContext"
+import { AnswersContext } from "../hooks/useAnswers/answersContext"
 
-import type { Question } from "../types"
+import type { Question } from "@app-types/index"
 import { useWallet } from "@hooks/useWallet"
 import { useStatusMessage } from "@hooks/useStatusMessage"
 import { useContract } from "@hooks/useContract"
@@ -166,7 +166,7 @@ export function Answers({ question, setQuestion }: AnswersProps) {
           <p>No answers yet. Be the first to answer!</p>
         ) : (
           sortedAnswers.map((answer) => (
-            <AnswerItem key={answer.id} isCorrect={answer.isCorrect}>
+            <AnswerItem key={answer.id} $isCorrect={answer.isCorrect}>
               <AnswerHeader>
                 <UserAvatar
                   src={`https://avatars.dicebear.com/api/identicon/${answer.authorAddress}.svg`}
