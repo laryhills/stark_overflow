@@ -111,7 +111,9 @@ function AnswerPageContent() {
           <Answers question={question} setQuestion={setQuestion} />
 
           {question.isOpen && <AnswerEditor questionId={questionId || ""} />}
-        </AnswersProvider>        {statusMessage?.type && (
+        </AnswersProvider>
+        
+        {statusMessage?.type && (
           <StatusMessage type={statusMessage.type}>
             {statusMessage.message}
           </StatusMessage>
