@@ -38,7 +38,10 @@ export function Answers({ question, setQuestion }: AnswersProps) {
       // Simple date sorting for mock data
       return a.timestamp.includes("Today") && !b.timestamp.includes("Today") ? -1 : 1
     }
-  })  // Handle marking an answer as correct
+  })
+
+  
+
   const handleMarkCorrect = async (answerId: string) => {
     if (!isConnected) {
       openConnectModal()
@@ -77,10 +80,9 @@ export function Answers({ question, setQuestion }: AnswersProps) {
     setStatusMessage({ type: "info", message: "Processing transaction..." })
 
     try {
-      // Use the markAnswerAsCorrect method from useContract
-      const success = await markAnswerAsCorrect(question.id, answerId)
+      const response = await markAnswerAsCorrect(question.id, answerId)
 
-      if (success) {
+      if (response) {
         // Update answers state to mark the correct answer
         setAnswers(
           answers.map((answer) => ({
@@ -126,7 +128,8 @@ export function Answers({ question, setQuestion }: AnswersProps) {
         setStatusMessage({ type: null, message: "" })
       }, 5000)
     }
-  }  // Handle voting on an answer
+  }
+
   const handleVote = async (answerId: string, direction: "up" | "down") => {
     if (!isConnected) {
       openConnectModal()
@@ -146,7 +149,6 @@ export function Answers({ question, setQuestion }: AnswersProps) {
     )
   }
 
-  // Check if current user is the question author
   const isQuestionAuthor = address && address.toLowerCase() === question.authorAddress.toLowerCase()
 
   return (

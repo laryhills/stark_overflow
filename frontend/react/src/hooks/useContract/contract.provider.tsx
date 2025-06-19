@@ -1,5 +1,5 @@
 import { useState, ReactNode, useCallback } from 'react'
-import { useAccount, useContract } from "@starknet-react/core"
+import { useAccount, useContract, useSendTransaction } from "@starknet-react/core"
 import { ContractContext } from './contract.context'
 import { formatters } from '@utils/formatters'
 import { contractAnswerToFrontend, contractQuestionToFrontend } from '@utils/contractTypeMapping'
@@ -93,6 +93,10 @@ export function ContractProvider({ children }: ContractProviderProps) {
   const clearQuestionError = () => setQuestionState(prev => ({ ...prev, error: null }))
   const clearAnswersError = () => setAnswersState(prev => ({ ...prev, error: null }))
 
+  const { sendAsync: markAnswerAsCorrectSendAsync } = useSendTransaction({
+    calls: undefined,
+  })
+
   const markAnswerAsCorrect = useCallback(async (questionId: string, answerId: string): Promise<boolean> => {
     if (!contract || !isConnected) {
       setMarkCorrectState({
@@ -103,19 +107,28 @@ export function ContractProvider({ children }: ContractProviderProps) {
       return false
     }
 
+    const transaction = contract && questionId && answerId
+      ? [contract.populate("mark_answer_as_correct", [formatters.numberToBigInt(Number(questionId)), formatters.numberToBigInt(Number(answerId))])]
+      : undefined
+
     setMarkCorrectState({ isLoading: true, error: null, transactionHash: null })
 
     try {
-      const questionIdBigInt = formatters.numberToBigInt(Number(questionId))
-      const answerIdBigInt = formatters.numberToBigInt(Number(answerId))
-
-      const result = await contract.mark_answer_as_correct(questionIdBigInt, answerIdBigInt)
-
       setMarkCorrectState({
         isLoading: false,
         error: null,
-        transactionHash: result?.transaction_hash || null
+        transactionHash: null
       })
+
+      const response = await markAnswerAsCorrectSendAsync(transaction)
+
+      if (response) {
+        setMarkCorrectState({
+          isLoading: false,
+          error: null,
+          transactionHash: response.transaction_hash || null
+        })
+      }
 
       return true
     } catch (error) {
@@ -123,7 +136,7 @@ export function ContractProvider({ children }: ContractProviderProps) {
       setMarkCorrectState({ isLoading: false, error: errorMessage, transactionHash: null })
       return false
     }
-  }, [contract, isConnected])
+  }, [contract, isConnected, markAnswerAsCorrectSendAsync])
 
   // Check if an answer has already been marked as correct for a question
   const getCorrectAnswer = useCallback(async (questionId: string): Promise<string | null> => {
