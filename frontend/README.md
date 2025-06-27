@@ -119,14 +119,18 @@ In the project directory, you can run:
 
 This project is licensed under the MIT License. See the [LICENSE](../LICENSE) file for more details.
 
-## 📞 Contact
+### 📞 Contact
 
-For questions or suggestions, contact:
+For questions or suggestions, feel free to reach out:
 
-- **Name**: Müller Esposito Nunes
-- **LinkedIn**: [linkedin.com/in/mulleresposito](https://linkedin.com/in/mulleresposito)
-- **Email**: [mulleresposito@hotmail.com](mailto:mulleresposito@hotmail.com)
+---
 
-- **Name**: Arnaelcio Gomes Pereira
-- **LinkedIn**: [linkedin.com/in/arnaelciogomespereira](https://linkedin.com/in/arnaelciogomespereira)
-- **Email**: [arnaelcio@gmail.com](mailto:arnaelcio@gmail.com)
+#### **Müller Esposito Nunes**  
+🔗 [LinkedIn](https://linkedin.com/in/mulleresposito)  
+✉️ [mulleresposito@hotmail.com](mailto:mulleresposito@hotmail.com)
+
+---
+
+#### **Arnaelcio Gomes Pereira**  
+🔗 [LinkedIn](https://linkedin.com/in/arnaelciogomespereira)  
+✉️ [arnaelcio@gmail.com](mailto:arnaelcio@gmail.com)
