@@ -50,7 +50,7 @@ export const lightTheme = {
   // Forum specific colors
   forum: {
     topicCard: {
-      background: "#ffffff",
+      background: "#f7f7f7",
       backgroundHover: "#f9fafb",
       text: "#1a1a1a",
       meta: "#6b7280",
