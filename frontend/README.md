@@ -12,11 +12,17 @@ react/
 ├── src/
 │   ├── assets/
 │   ├── components/
+│   ├── hooks/
 │   ├── pages/
+│   ├── providers/
+│   ├── scripts/
 │   ├── services/
+│   ├── styles/
+│   ├── types/
+│   ├── utils/
 │   ├── App.tsx
-│   ├── index.tsx
-│   └── ...
+│   ├── main.tsx
+│   └── router.tsx
 ├── .env
 ├── package.json
 ├── tsconfig.json
@@ -27,10 +33,17 @@ react/
 - `src/`: Main source code directory.
   - `assets/`: Static resources such as images and fonts.
   - `components/`: Reusable UI components.
+  - `hooks/`: Custom hooks for state management and other functionalities.
   - `pages/`: Application pages.
+  - `providers/`: Modules for API communication and other functionalities.
+  - `scripts/`: Custom scripts for the application.
   - `services/`: Modules for API communication and other functionalities.
+  - `styles/`: Application styles.
+  - `types/`: TypeScript types for the application.
+  - `utils/`: Utility functions for the application.
   - `App.tsx`: Root component of the application.
-  - `index.tsx`: React entry point.
+  - `main.tsx`: React entry point.
+  - `router.tsx`: React router configuration.
 
 ## 🛠️ Technologies Used
 
@@ -70,7 +83,7 @@ react/
    Create a `.env` file in the root directory of `react/` and define the necessary variables. For example:
 
    ```env
-   REACT_APP_API_URL=http://localhost:4000
+   VITE_CONTRACT_ADDRESS=0x0228432fe63e8808fd694c8c80f6266a735c340760812f64fe20b015d2b2700e
    ```
 
    Adjust the variables according to your environment needs.
@@ -114,3 +127,6 @@ For questions or suggestions, contact:
 - **LinkedIn**: [linkedin.com/in/mulleresposito](https://linkedin.com/in/mulleresposito)
 - **Email**: [mulleresposito@hotmail.com](mailto:mulleresposito@hotmail.com)
 
+- **Name**: Arnaelcio Gomes Pereira
+- **LinkedIn**: [linkedin.com/in/arnaelciogomespereira](https://linkedin.com/in/arnaelciogomespereira)
+- **Email**: [arnaelcio@gmail.com](mailto:arnaelcio@gmail.com)
