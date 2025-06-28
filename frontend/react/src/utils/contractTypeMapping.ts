@@ -46,13 +46,15 @@ const generateMockAuthorName = (address: string): string => {
 }
 
 // Convert contract Question to frontend Question
-export const contractQuestionToFrontend = (contractQuestion: ContractQuestion): Question => {
+export const contractQuestionToFrontend = (contractQuestion: ContractQuestion, totalStakedAmount?: string): Question => {
   // convert author and value to hex address and number
   const authorAddress = formatters.bigIntToAddress(contractQuestion.author)
   const value = formatters.bigIntToNumber(contractQuestion.value)
   const status = formatters.formatStatus(contractQuestion.status)
   const authorName = generateMockAuthorName(authorAddress)
 
+  // Use provided totalStakedAmount if available, otherwise fall back to contract value
+  const stakeAmount = totalStakedAmount ? totalStakedAmount : (Number(value)).toFixed(2)
 
   return {
     id: contractQuestion.id.toString(),
@@ -63,7 +65,7 @@ export const contractQuestionToFrontend = (contractQuestion: ContractQuestion): 
     authorAddress: authorAddress,
     authorName,
     timestamp: generateMockTimestamp(),
-    stakeAmount: (Number(value)).toFixed(2),
+    stakeAmount: stakeAmount,
     tags: generateMockTags(),
     repositoryUrl: generateMockRepository(),
     isOpen: status === "Open"

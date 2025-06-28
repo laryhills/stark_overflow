@@ -22,6 +22,7 @@ import { useStaking } from "../hooks/useStaking"
 import type { Question } from "@app-types/index"
 import { useStatusMessage } from "@hooks/useStatusMessage"
 import { useWallet } from "@hooks/useWallet"
+import { useContract } from "@hooks/useContract"
 
 interface StakeModalProps {
   question: Question
@@ -31,17 +32,22 @@ interface StakeModalProps {
 export function StakeModal({ question, setQuestion }: StakeModalProps) {
   const [amount, setAmount] = useState("")
   const [error, setError] = useState<string | null>(null)
-  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const { isConnected } = useAccount()
   const { openConnectModal } = useWallet()
   const { setStatusMessage } = useStatusMessage()
   const {
     isStakeModalOpen,
-    isLoading,
     setIsStakeModalOpen,
-    setIsLoading,
   } = useStaking()
+
+  const {
+    addFundsToQuestion,
+    getTotalStakedOnQuestion,
+    stakingLoading,
+    stakingError,
+    clearStakingError
+  } = useContract()
 
   // Handle adding stake to the question
   const onStake = async (amount: string) => {
@@ -50,26 +56,32 @@ export function StakeModal({ question, setQuestion }: StakeModalProps) {
       return
     }
 
-    setIsLoading(true)
     setStatusMessage({ type: "info", message: "Processing stake transaction..." })
+    clearStakingError()
 
     try {
-      // Simulate blockchain transaction
-      await new Promise((resolve) => setTimeout(resolve, 2000))
+      const success = await addFundsToQuestion(Number(question.id), amount)
 
-      // Update question with new stake amount
-      const currentAmount = Number.parseFloat(question.stakeAmount.replace(",", ""))
-      const newAmount = currentAmount + Number.parseFloat(amount)
+      if (success) {
+        // Fetch updated stake amount from contract
+        const newStakeAmount = await getTotalStakedOnQuestion(Number(question.id))
 
-      setQuestion({
-        ...question,
-        stakeAmount: newAmount.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ","),
-      })
+        // Update question with new stake amount
+        setQuestion({
+          ...question,
+          stakeAmount: newStakeAmount,
+        })
 
-      setStatusMessage({
-        type: "success",
-        message: `Successfully added ${amount} to the question reward!`,
-      })
+        setStatusMessage({
+          type: "success",
+          message: `Successfully added $${amount} to the question reward!`,
+        })
+      } else {
+        setStatusMessage({
+          type: "error",
+          message: "Failed to add stake. Please try again.",
+        })
+      }
     } catch (error) {
       console.error("Stake transaction error:", error)
       setStatusMessage({
@@ -77,7 +89,6 @@ export function StakeModal({ question, setQuestion }: StakeModalProps) {
         message: "Failed to add stake. Please try again.",
       })
     } finally {
-      setIsLoading(false)
       setIsStakeModalOpen(false)
       // Clear status message after 5 seconds
       setTimeout(() => {
@@ -100,7 +111,7 @@ export function StakeModal({ question, setQuestion }: StakeModalProps) {
   // Handle stake submission
   const handleSubmit = async () => {
     // Validate amount
-    if (!amount || Number.parseFloat(amount) <= 0) {
+    if (!amount || Number(amount) <= 0) {
       setError("Please enter a valid amount")
       return
     }
@@ -111,19 +122,17 @@ export function StakeModal({ question, setQuestion }: StakeModalProps) {
       return
     }
 
-    setIsSubmitting(true)
     setError(null)
 
     try {
       // Call the onStake callback
-      onStake(amount)
+      await onStake(amount)
 
       // Reset form
       setAmount("")
     } catch (err) {
       console.error("Error staking:", err)
       setError("Failed to stake. Please try again.")
-      setIsSubmitting(false)
     }
   }
 
@@ -131,14 +140,20 @@ export function StakeModal({ question, setQuestion }: StakeModalProps) {
   const handleClose = () => {
     setAmount("")
     setError(null)
+    clearStakingError()
     setIsStakeModalOpen(false)
+  }
+
+  // Show staking error if any
+  if (stakingError && !error) {
+    setError(stakingError)
   }
 
   if (!isStakeModalOpen) return null
 
   return (
     <ModalOverlay onClick={handleClose}>
-      {isLoading && <LoadingSpinner />}
+      {stakingLoading && <LoadingSpinner />}
       <ModalContent onClick={(e) => e.stopPropagation()}>
         <ModalHeader>
           <ModalTitle>Add Stake to Question</ModalTitle>
@@ -160,13 +175,20 @@ export function StakeModal({ question, setQuestion }: StakeModalProps) {
 
           <InputContainer>
             <CurrencyDollar size={20} weight="fill" />
-            <StakeInput type="text" value={amount} onChange={handleAmountChange} placeholder="0.00" autoFocus />
+            <StakeInput
+              type="text"
+              value={amount}
+              onChange={handleAmountChange}
+              placeholder="0.00"
+              autoFocus
+              disabled={stakingLoading}
+            />
           </InputContainer>
 
           {error && <ErrorMessage>{error}</ErrorMessage>}
 
-          <StakeButton onClick={handleSubmit} disabled={isSubmitting}>
-            {isSubmitting ? "Processing..." : "Add Stake"}
+          <StakeButton onClick={handleSubmit} disabled={stakingLoading || !amount}>
+            {stakingLoading ? "Processing..." : "Add Stake"}
           </StakeButton>
         </ModalBody>
       </ModalContent>

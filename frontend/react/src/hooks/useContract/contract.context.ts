@@ -13,12 +13,17 @@ interface ContractContextType {
   answersError: string | null
   markCorrectLoading: boolean
   markCorrectError: string | null
+  stakingLoading: boolean
+  stakingError: string | null
   fetchQuestion: (questionId: number) => Promise<Question | null>
   fetchAnswers: (questionId: number) => Promise<Answer[]>
   clearQuestionError: () => void
   clearAnswersError: () => void
   markAnswerAsCorrect: (questionId: string, answerId: string) => Promise<boolean>
   getCorrectAnswer: (questionId: string) => Promise<string | null>
+  addFundsToQuestion: (questionId: number, amount: string) => Promise<boolean>
+  getTotalStakedOnQuestion: (questionId: number) => Promise<string>
+  clearStakingError: () => void
 }
 
 export const ContractContext = createContext<ContractContextType | undefined>(undefined)
