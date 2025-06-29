@@ -6,7 +6,7 @@ import { formatters } from '@utils/formatters'
 import { contractAnswerToFrontend, contractQuestionToFrontend } from '@utils/contractTypeMapping'
 import { ERROR_MESSAGES } from './errors'
 import { ContractState, Question, Answer, StarkOverflowABI } from '@app-types/index'
-import { Question as ContractQuestion, Answer as ContractAnswer } from '@app-types/contract-types'
+import { Question as ContractQuestion, Answer as ContractAnswer, Uint256 } from '@app-types/contract-types'
 
 interface ContractProviderProps {
   children: ReactNode
@@ -71,9 +71,11 @@ export function ContractProvider({ children }: ContractProviderProps) {
     setQuestionState({ isLoading: true, error: null, transactionHash: null })
 
     try {
+      /* const contractQuestion = await (contractInstance.get_question(BigInt(questionId))) as unknown as ContractQuestion */
+
       const [contractQuestion, totalStaked] = await Promise.all([
-        (contractInstance.get_question(BigInt(questionId))) as unknown as ContractQuestion,
-        contractInstance.get_total_staked_on_question(BigInt(questionId)) as Promise<bigint>
+        (await contractInstance.get_question(BigInt(questionId))) as unknown as ContractQuestion,
+        (await contractInstance.get_total_staked_on_question(BigInt(questionId)) as Promise<bigint>)
       ])
 
       if (!contractQuestion.description || !contractQuestion.id) {
@@ -81,7 +83,8 @@ export function ContractProvider({ children }: ContractProviderProps) {
         return null
       }
 
-      const question = contractQuestionToFrontend(contractQuestion, formatters.bigIntToString(totalStaked))
+      const question = contractQuestionToFrontend(contractQuestion)
+      question.stakeAmount = formatters.convertWeiToDecimal(Number(totalStaked))
       setQuestionState({ isLoading: false, error: null, transactionHash: null })
       return question
     } catch (error) {
@@ -173,7 +176,7 @@ export function ContractProvider({ children }: ContractProviderProps) {
   }, [getContractForWriting, isConnected, markAnswerAsCorrectSendAsync])
 
   // Add funds to question
-  const addFundsToQuestion = useCallback(async (questionId: number, amount: string): Promise<boolean> => {
+  const addFundsToQuestion = useCallback(async (questionId: number, amount: Uint256): Promise<boolean> => {
     const contractInstance = await getContractForWriting()
     if (!contractInstance || !isConnected) {
       setStakingState({
@@ -184,18 +187,20 @@ export function ContractProvider({ children }: ContractProviderProps) {
       return false
     }
 
-    if (isNaN(Number(amount))) {
-      setStakingState({ isLoading: false, error: "Invalid amount", transactionHash: null })
-      return false
-    }
-
     setStakingState({ isLoading: true, error: null, transactionHash: null })
 
     try {
-      const transaction = [contractInstance.populate("add_funds_to_question", [
-        BigInt(questionId),
-        BigInt(Number(amount))
-      ])]
+      // first approve the amount , then add funds to question
+      const transaction = [
+        {
+          contractAddress: import.meta.env.VITE_TOKEN_ADDRESS,
+          entrypoint: "approve",
+          calldata: [contractInstance.address, amount.low, amount.high],
+        },
+        contractInstance.populate("add_funds_to_question", [
+          BigInt(questionId),
+          amount
+        ])]
 
       const response = await addFundsToQuestionSendAsync(transaction)
 
@@ -217,18 +222,20 @@ export function ContractProvider({ children }: ContractProviderProps) {
   }, [getContractForWriting, isConnected, addFundsToQuestionSendAsync])
 
   // Get total staked amount on question
-  const getTotalStakedOnQuestion = useCallback(async (questionId: number): Promise<string> => {
+  const getTotalStakedOnQuestion = useCallback(async (questionId: number): Promise<number> => {
     const contractInstance = await getContractForReading()
     if (!contractInstance) {
-      return ""
+      return 0
     }
 
     try {
       const result = await contractInstance.get_total_staked_on_question(BigInt(questionId)) as bigint
-      return formatters.bigIntToString(result)
+      console.log("getTotalStakedOnQuestion", formatters.convertWeiToDecimal(Number(result)))
+      return formatters.convertWeiToDecimal(Number(result))
+      // return formatters.bigIntToNumber(Number(result))
     } catch (error) {
       console.error("Error fetching total staked amount:", error)
-      return ""
+      return 0
     }
   }, [getContractForReading])
 

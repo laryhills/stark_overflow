@@ -92,7 +92,7 @@ export const contractQuestionToFrontend = (
     authorAddress: authorAddress,
     authorName,
     timestamp: generateMockTimestamp(),
-    stakeAmount: decimalValue.toFixed(2),
+    stakeAmount: decimalValue,
     tags: generateMockTags(),
     repositoryUrl: generateMockRepository(),
     isOpen: status === "Open",
