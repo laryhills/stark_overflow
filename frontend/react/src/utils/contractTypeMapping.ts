@@ -1,5 +1,5 @@
-import { formatters } from "./formatters";
-import { Question, Answer } from "@app-types/index";
+import { formatters } from "./formatters"
+import { Question, Answer } from "@app-types/index"
 import { Question as ContractQuestion, Answer as ContractAnswer } from "../types/contract-types"
 
 // Mock data generators for missing fields
@@ -7,7 +7,7 @@ const generateMockTags = (): string[] => {
   const allTags = ["starknet", "cairo", "blockchain", "smart-contracts", "defi", "nft", "web3"]
   const count = Math.floor(Math.random() * 3) + 1 // 1-3 tags
   return allTags.sort(() => 0.5 - Math.random()).slice(0, count)
-};
+}
 
 const generateMockTimestamp = (): string => {
   const randomHours = Math.floor(Math.random() * 48) // 0-48 hours ago

@@ -354,7 +354,7 @@ export const ActionButton = styled.button`
     background: #9ca3af;
     cursor: not-allowed;
   }
-  
+
   @media (max-width: 768px) {
     padding: 6px 10px;
     font-size: 0.9rem;
