@@ -35,7 +35,7 @@ export const formatters = {
   },
 
   convertWeiToDecimal: (wei: number) => {
-    const integerPart = wei / 10 ** 18;
+    const integerPart = Math.floor(wei / 10 ** 18);
     const fractionalPart = wei % 10 ** 18;
     return Number(integerPart) + Number(fractionalPart) / 10 ** 18;
   },
