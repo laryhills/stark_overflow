@@ -7,15 +7,7 @@ import {
 
 // Mock data generators for missing fields
 const generateMockTags = (): string[] => {
-  const allTags = [
-    "starknet",
-    "cairo",
-    "blockchain",
-    "smart-contracts",
-    "defi",
-    "nft",
-    "web3",
-  ];
+  const allTags = ["starknet", "cairo", "blockchain", "smart-contracts", "defi", "nft", "web3"];
   const count = Math.floor(Math.random() * 3) + 1; // 1-3 tags
   return allTags.sort(() => 0.5 - Math.random()).slice(0, count);
 };
@@ -45,26 +37,8 @@ const generateMockRepository = (): string => {
 };
 
 const generateMockAuthorName = (address: string): string => {
-  const names = [
-    "Alice",
-    "Bob",
-    "Charlie",
-    "Diana",
-    "Eve",
-    "Frank",
-    "Grace",
-    "Henry",
-  ];
-  const surnames = [
-    "Smith",
-    "Johnson",
-    "Williams",
-    "Brown",
-    "Jones",
-    "Garcia",
-    "Miller",
-    "Davis",
-  ];
+  const names = ["Alice", "Bob", "Charlie", "Diana", "Eve", "Frank", "Grace", "Henry"];
+  const surnames = ["Smith", "Johnson", "Williams", "Brown", "Jones", "Garcia", "Miller", "Davis"]
 
   // Use address to generate consistent name for same address
   const nameIndex = parseInt(address.slice(-2), 16) % names.length;
