@@ -1,16 +1,16 @@
 import { formatters } from "./formatters";
 import { Question, Answer } from "@app-types/index";
-import { Question as ContractQuestion, Answer as ContractAnswer } from "../types/contract-types";
+import { Question as ContractQuestion, Answer as ContractAnswer } from "../types/contract-types"
 
 // Mock data generators for missing fields
 const generateMockTags = (): string[] => {
-  const allTags = ["starknet", "cairo", "blockchain", "smart-contracts", "defi", "nft", "web3"];
-  const count = Math.floor(Math.random() * 3) + 1; // 1-3 tags
-  return allTags.sort(() => 0.5 - Math.random()).slice(0, count);
+  const allTags = ["starknet", "cairo", "blockchain", "smart-contracts", "defi", "nft", "web3"]
+  const count = Math.floor(Math.random() * 3) + 1 // 1-3 tags
+  return allTags.sort(() => 0.5 - Math.random()).slice(0, count)
 };
 
 const generateMockTimestamp = (): string => {
-  const randomHours = Math.floor(Math.random() * 48); // 0-48 hours ago
+  const randomHours = Math.floor(Math.random() * 48) // 0-48 hours ago
 
   if (randomHours < 1) {
     return "Just now"
@@ -30,7 +30,7 @@ const generateMockRepository = (): string => {
     "https://github.com/MullerEsposito/stark_overflow",
     "",
   ]
-  return repos[Math.floor(Math.random() * repos.length)];
+  return repos[Math.floor(Math.random() * repos.length)]
 }
 
 const generateMockAuthorName = (address: string): string => {
@@ -44,9 +44,7 @@ const generateMockAuthorName = (address: string): string => {
   return `${names[nameIndex]} ${surnames[surnameIndex]}`
 }
 
-export const contractQuestionToFrontend = (
-  contractQuestion: ContractQuestion
-): Question => {
+export const contractQuestionToFrontend = (contractQuestion: ContractQuestion): Question => {
   const authorAddress = formatters.bigIntToAddress(contractQuestion.author)
   const status = formatters.formatStatus(contractQuestion.status)
   const authorName = generateMockAuthorName(authorAddress)
@@ -69,10 +67,7 @@ export const contractQuestionToFrontend = (
   }
 }
 
-export const contractAnswerToFrontend = (
-  contractAnswer: ContractAnswer,
-  isCorrect = false
-): Answer => {
+export const contractAnswerToFrontend = (contractAnswer: ContractAnswer, isCorrect = false): Answer => {
   const authorAddress = formatters.bigIntToAddress(contractAnswer.author)
   const authorName = generateMockAuthorName(authorAddress)
 
