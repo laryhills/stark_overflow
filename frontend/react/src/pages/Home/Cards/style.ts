@@ -2,10 +2,20 @@ import styled from "styled-components";
 
 export const CardsContainer = styled.div`
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 1.5rem;
   margin-top: 1rem;
   width: 100%;
+
+  @media (max-width: 768px) {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+  }
+
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
 `;
 
 export const Card = styled.div`
