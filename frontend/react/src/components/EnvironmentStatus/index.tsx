@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { validateEnvironment, getEnvironmentDebugInfo, isDevelopment } from '@utils/environment'
 
 interface EnvironmentStatusProps {

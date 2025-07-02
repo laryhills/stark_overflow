@@ -15,7 +15,6 @@ import { QuestionDetailContainer, StatusMessage } from "./styles"
 import { useStatusMessage } from "@hooks/useStatusMessage"
 import { useContract } from "@hooks/useContract"
 import { Question as QuestionType } from "@app-types/index"
-import { useAccount } from "@starknet-react/core"
 import { AnswerEditorProvider } from "./AnswerEditor/useAnswerEditor/answerEditor.provider"
 
 export function AnswerPage() {
@@ -30,7 +29,6 @@ function AnswerPageContent() {
   const params = useParams<{ questionId: string }>()
   const questionId = Number(params.questionId)
   const { statusMessage } = useStatusMessage()
-  const { isConnected } = useAccount()
 
   const [question, setQuestion] = useState<QuestionType | null>(null)
   const [retryAttempts, setRetryAttempts] = useState(0)
