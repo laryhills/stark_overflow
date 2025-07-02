@@ -34,7 +34,7 @@ interface StakeModalProps {
 export function StakeModal({ question, setQuestion }: StakeModalProps) {
   const [amount, setAmount] = useState("")
   const [error, setError] = useState<string | null>(null)
-  const [loading, setLoading] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const amountInWei = formatters.convertStringDecimalToWei(amount);
   const scaledAmount = cairo.uint256(amountInWei);
@@ -69,7 +69,7 @@ export function StakeModal({ question, setQuestion }: StakeModalProps) {
       return
     }
 
-    setLoading(true)
+    setIsSubmitting(true)
 
     try {
       const success = await addFundsToQuestion(Number(question.id), scaledAmount)
@@ -105,7 +105,7 @@ export function StakeModal({ question, setQuestion }: StakeModalProps) {
         message: "Failed to add stake. Please try again.",
       })
     } finally {
-      setLoading(false)
+      setIsSubmitting(false)
       // Clear status message after 5 seconds
       setTimeout(() => {
         setStatusMessage({ type: null, message: "" })
@@ -165,6 +165,9 @@ export function StakeModal({ question, setQuestion }: StakeModalProps) {
     setError(stakingError)
   }
 
+  const isProcessing = stakingLoading || isSubmitting;
+
+
   if (!isStakeModalOpen) return null
 
   return (
@@ -197,14 +200,14 @@ export function StakeModal({ question, setQuestion }: StakeModalProps) {
               onChange={handleAmountChange}
               placeholder="0.00"
               autoFocus
-              disabled={stakingLoading}
+              disabled={isProcessing}
             />
           </InputContainer>
 
           {error && <ErrorMessage>{error}</ErrorMessage>}
 
-          <StakeButton onClick={handleSubmit} disabled={stakingLoading || !amount || loading}>
-            {stakingLoading || loading ? "Processing..." : "Add Stake"}
+          <StakeButton onClick={handleSubmit} disabled={isProcessing}>
+            {isProcessing ? "Processing..." : "Add Stake"}
           </StakeButton>
         </ModalBody>
       </ModalContent>
