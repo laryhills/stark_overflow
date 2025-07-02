@@ -1,107 +1,103 @@
 export const lightTheme = {
-  // Core colors
-  background: "#ffffff",
-  text: "#1a1a1a",
-  textSecondary: "#6b7280",
-  textTertiary: "#9ca3af",
-  
-  // Card and surface colors
+  // Backgrounds
+  background: "#f7f8fa", // Soft, not pure white
   cardBackground: "#ffffff",
-  cardBackgroundSecondary: "#f9fafb",
-  cardBackgroundTertiary: "#f3f4f6",
-  
-  // Border colors
-  borderColor: "#e5e7eb",
-  borderColorSecondary: "#d1d5db",
-  borderColorTertiary: "#f3f4f6",
-  
-  // Primary brand colors
+  cardBackgroundSecondary: "#f3f6fa",
+  cardBackgroundTertiary: "#f7f8fa",
+
+  // Borders & Shadows
+  borderColor: "#e3e8ee",
+  borderColorSecondary: "#e9eaf0",
+  borderColorTertiary: "#f3f6fa",
+  shadow: {
+    sm: "0 1px 2px 0 rgba(60,72,88,0.07)",
+    md: "0 2px 8px 0 rgba(60,72,88,0.07)",
+    lg: "0 8px 24px 0 rgba(60,72,88,0.10)",
+    xl: "0 16px 32px 0 rgba(60,72,88,0.12)",
+  },
+
+  // Primary & Accent Colors
   primary: "#7c3aed",
-  primaryHover: "#6d28d9",
-  primaryActive: "#5b21b6",
-  primaryLight: "#f3f4f6",
-  
-  // Secondary colors
-  secondary: "#f9fafb",
-  secondaryHover: "#f3f4f6",
-  secondaryActive: "#e5e7eb",
-  
+  primaryHover: "#6842c2",
+  primaryActive: "#4c2885",
+  primaryLight: "#ede9fe",
+  accentBlue: "#2563eb",
+  accentGreen: "#10b981",
+  accentOrange: "#f59e42",
+
+  // Text
+  text: "#23272f",
+  textSecondary: "#5b6475",
+  textTertiary: "#a0aec0",
+  textOnPrimary: "#ffffff",
+
   // Interactive elements
-  connectBg: "#1a1a1a",
+  connectBg: "#7c3aed",
   connectText: "#ffffff",
-  connectHover: "#374151",
-  
+  connectHover: "#6842c2",
+
   // Hover states
-  hover: "#f3f4f6",
-  hoverSecondary: "#e5e7eb",
-  
+  hover: "#f3f6fa",
+  hoverSecondary: "#ede9fe",
+
   // Semantic colors
-  warning: "#dc2626",
-  warningLight: "#fef2f2",
-  success: "#059669",
-  successLight: "#f0fdf4",
+  success: "#10b981",
+  successLight: "#e6f9f2",
+  warning: "#f59e42",
+  warningLight: "#fff7ed",
+  error: "#ef4444",
+  errorLight: "#fef2f2",
   info: "#2563eb",
   infoLight: "#eff6ff",
-  
-  // Status colors
-  error: "#dc2626",
-  errorLight: "#fef2f2",
-  
+
   // Forum specific colors
   forum: {
     topicCard: {
-      background: "#f7f7f7",
-      backgroundHover: "#f9fafb",
-      text: "#1a1a1a",
-      meta: "#6b7280",
-      border: "#e5e7eb",
+      background: "#ffffff",
+      backgroundHover: "#f3f6fa",
+      text: "#23272f",
+      meta: "#5b6475",
+      border: "#e3e8ee",
     },
   },
-  
+
   // Button states
   button: {
     primary: {
-      background: "#7c3aed",
+      background: "linear-gradient(90deg, #7c3aed 0%, #6842c2 100%)",
       text: "#ffffff",
-      hover: "#6d28d9",
-      active: "#5b21b6",
-      disabled: "#d1d5db",
-      disabledText: "#9ca3af",
+      hover: "#6842c2",
+      active: "#4c2885",
+      disabled: "#e3e8ee",
+      disabledText: "#a0aec0",
     },
     secondary: {
-      background: "#f9fafb",
-      text: "#1a1a1a",
-      hover: "#f3f4f6",
-      active: "#e5e7eb",
-      disabled: "#f3f4f6",
-      disabledText: "#9ca3af",
+      background: "#ffffff",
+      text: "#23272f",
+      hover: "#f3f6fa",
+      active: "#e3e8ee",
+      disabled: "#f3f6fa",
+      disabledText: "#a0aec0",
+      border: "#e3e8ee",
     },
     danger: {
-      background: "#dc2626",
+      background: "#ef4444",
       text: "#ffffff",
-      hover: "#b91c1c",
+      hover: "#dc2626",
       active: "#991b1b",
-      disabled: "#fecaca",
-      disabledText: "#9ca3af",
+      disabled: "#fef2f2",
+      disabledText: "#a0aec0",
     },
   },
-  
+
   // Input states
   input: {
     background: "#ffffff",
-    border: "#d1d5db",
+    border: "#e3e8ee",
     borderFocus: "#7c3aed",
-    text: "#1a1a1a",
-    placeholder: "#9ca3af",
-    disabled: "#f9fafb",
-    disabledText: "#9ca3af",
-  },
-  
-  // Shadow and elevation
-  shadow: {
-    sm: "0 1px 2px 0 rgba(0, 0, 0, 0.05)",
-    md: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
-    lg: "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
-    xl: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
+    text: "#23272f",
+    placeholder: "#a0aec0",
+    disabled: "#f3f6fa",
+    disabledText: "#a0aec0",
   },
 }

@@ -1,7 +1,7 @@
 import "styled-components"
-import { defaultTheme } from "../styles/themes";
+import { lightTheme } from "../styles/themes";
 
-type ThemeType = typeof defaultTheme;
+type ThemeType = typeof lightTheme;
 
 declare module "styled-components" {
   export interface DefaultTheme extends ThemeType {
@@ -81,6 +81,7 @@ declare module "styled-components" {
         active: string
         disabled: string
         disabledText: string
+        border: string
       }
       danger: {
         background: string

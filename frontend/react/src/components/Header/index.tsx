@@ -1,6 +1,5 @@
 import { Moon, Sun } from "phosphor-react";
 import { HeaderContainer, Logo, ToggleThemeButton } from "./style";
-import { lightTheme } from "../../styles/themes/light";
 import { useTheme } from "styled-components";
 import styled from "styled-components";
 import starkoverflowLogo from "../../assets/logos/starkoverflow.svg";
@@ -19,6 +18,7 @@ interface HeaderProps {
 
 export function Header({ toggleTheme }: HeaderProps) {
   const theme = useTheme();
+  const isLight = theme.background === "#f7f8fa";
   
   return (
     <HeaderContainer>
@@ -28,7 +28,7 @@ export function Header({ toggleTheme }: HeaderProps) {
       
       <HeaderActionsContainer>
         <ToggleThemeButton onClick={toggleTheme}>
-          {theme === lightTheme ? <Moon size={24} /> : <Sun size={24} />}
+          {isLight ? <Moon size={24} /> : <Sun size={24} />}
         </ToggleThemeButton>
         <ConnectButton />
       </HeaderActionsContainer>
