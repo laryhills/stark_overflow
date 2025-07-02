@@ -49,7 +49,6 @@ export function StakeModal({ question, setQuestion }: StakeModalProps) {
 
   const {
     addFundsToQuestion,
-    stakingLoading,
     stakingError,
     clearStakingError
   } = useContract()
@@ -93,6 +92,7 @@ export function StakeModal({ question, setQuestion }: StakeModalProps) {
         })
         setIsStakeModalOpen(false)
       } else {
+        setIsSubmitting(false)
         setStatusMessage({
           type: "error",
           message: "Failed to add stake. Please try again.",
@@ -165,14 +165,12 @@ export function StakeModal({ question, setQuestion }: StakeModalProps) {
     setError(stakingError)
   }
 
-  const isProcessing = stakingLoading || isSubmitting;
-
 
   if (!isStakeModalOpen) return null
 
   return (
     <ModalOverlay onClick={handleClose}>
-      {stakingLoading && <LoadingSpinner />}
+      {isSubmitting && <LoadingSpinner />}
       <ModalContent onClick={(e) => e.stopPropagation()}>
         <ModalHeader>
           <ModalTitle>Add Stake to Question</ModalTitle>
@@ -200,14 +198,14 @@ export function StakeModal({ question, setQuestion }: StakeModalProps) {
               onChange={handleAmountChange}
               placeholder="0.00"
               autoFocus
-              disabled={isProcessing}
+              disabled={isSubmitting}
             />
           </InputContainer>
 
           {error && <ErrorMessage>{error}</ErrorMessage>}
 
-          <StakeButton onClick={handleSubmit} disabled={isProcessing}>
-            {isProcessing ? "Processing..." : "Add Stake"}
+          <StakeButton onClick={handleSubmit} disabled={isSubmitting}>
+            {isSubmitting ? "Processing..." : "Add Stake"}
           </StakeButton>
         </ModalBody>
       </ModalContent>
