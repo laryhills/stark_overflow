@@ -102,10 +102,7 @@ export const ConnectButtonContainer = styled.div`
 `;
 
 export const StyledButton = styled.button`
-   background: ${(props) => {
-    console.log('StyledButton theme:', props.theme);
-    return props.theme?.button?.primary?.background || 'red';
-  }};
+   background: ${(props) => props.theme?.button?.primary?.background || 'red'};
   color: ${(props) => props.theme?.button?.primary?.text || 'white'};
   border: none;
   border-radius: 8px;
@@ -113,10 +110,7 @@ export const StyledButton = styled.button`
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  box-shadow: ${(props) => {
-    console.log('StyledButton shadow:', props.theme?.shadow);
-    return props.theme?.shadow?.sm || 'none';
-  }};
+  box-shadow: ${(props) => props.theme?.shadow?.sm || 'none'};
   transition: background 0.2s, box-shadow 0.2s, color 0.2s, opacity 0.2s;
 
   &:hover:not(:disabled) {
@@ -274,10 +268,7 @@ export const InstallButton = styled.button`
   gap: 12px;
   width: 100%;
   padding: 12px 16px;
-  background: ${(props) => {
-    console.log('InstallButton theme:', props.theme);
-    return props.theme?.button?.secondary?.background || 'red';
-  }};
+  background: ${(props) => props.theme?.button?.secondary?.background || 'red'};
   color: ${(props) => props.theme?.button?.secondary?.text || 'white'};
   border: 1px solid ${(props) => props.theme?.button?.secondary?.border || '#e3e8ee'};
   border-radius: 8px;
