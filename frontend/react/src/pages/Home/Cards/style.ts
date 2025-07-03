@@ -22,124 +22,56 @@ export const Card = styled.div`
   display: flex;
   align-items: center;
   background-color: ${(props) => props.theme.cardBackground};
-  padding: 2rem 1.25rem;
-  border-radius: 8px;
-  border: 1px solid ${(props) => props.theme.borderColor};
-  transition: transform 0.2s, box-shadow 0.2s;
-  min-height: 120px;
+  padding: 2.5rem 2rem;
+  border-radius: 16px;
+  border: 1.5px solid ${(props) => props.theme.borderColor};
+  box-shadow: ${(props) => props.theme.shadow.sm};
+  transition: box-shadow 0.2s, border-color 0.2s, background 0.2s, transform 0.2s cubic-bezier(0.22, 1, 0.36, 1);
 
   &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: ${(props) => props.theme.shadow.md};
+    border-color: ${(props) => props.theme.primaryLight};
+    background: ${(props) => props.theme.cardBackgroundSecondary};
+    transform: translateY(-8px) scale(1.03);
+  }
+  &:active {
+    transform: translateY(2px) scale(0.98);
   }
 
   img {
     width: 72px;
     height: 68px;
-    border-radius: 50%;
-    flex-shrink: 0;
+    border-radius: 12px;
+    box-shadow: ${(props) => props.theme.shadow.sm};
   }
 
   section {
     display: flex;
     flex-direction: column;
-    flex: 1;
-    min-width: 0;
+    margin-left: 1.5rem;
 
     small {
-      font-size: 0.625rem;
-      color: #8d8d99;
+      font-size: 0.75rem;
+      color: ${(props) => props.theme.textTertiary};
+      letter-spacing: 0.05em;
+      font-weight: 500;
+    }
+    strong {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: ${(props) => props.theme.text};
       margin-bottom: 0.25rem;
     }
-    
-    strong {
-      font-size: 1rem;
-      font-weight: bolder;
-      color: ${(props) => props.theme.text};
-      margin-bottom: 0.5rem;
-      word-break: break-word;
-    }
-
     div {
       display: flex;
       margin-top: 0.625rem;
       gap: 1rem;
-      flex-wrap: wrap;
-
       span {
         display: flex;
         gap: 0.25rem;
-        font-size: 0.75rem;
-        align-items: center;
-        white-space: nowrap;
-      }
-    }
-  }
-
-  @media (max-width: 768px) {
-    padding: 1.5rem 1rem;
-    min-height: 100px;
-
-    img {
-      width: 60px;
-      height: 56px;
-    }
-
-    section {
-      strong {
-        font-size: 0.9rem;
-      }
-
-      div span {
-        font-size: 0.7rem;
-      }
-    }
-  }
-
-  @media (max-width: 480px) {
-    padding: 1.25rem 0.75rem;
-    min-height: 90px;
-
-    img {
-      width: 48px;
-      height: 44px;
-    }
-
-    section {
-      strong {
         font-size: 0.85rem;
-      }
-
-      div {
-        gap: 0.75rem;
-        
-        span {
-          font-size: 0.65rem;
-        }
-      }
-    }
-  }
-
-  @media (max-width: 320px) {
-    padding: 1rem 0.5rem;
-    min-height: 80px;
-
-    img {
-      width: 40px;
-      height: 36px;
-    }
-
-    section {
-      strong {
-        font-size: 0.8rem;
-      }
-
-      div {
-        gap: 0.5rem;
-        
-        span {
-          font-size: 0.6rem;
-        }
+        align-items: center;
+        color: ${(props) => props.theme.textSecondary};
       }
     }
   }

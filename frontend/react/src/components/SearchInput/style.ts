@@ -3,31 +3,34 @@ import styled from "styled-components";
 export const SearchInputContainer = styled.div`
   display: flex;
   align-items: center;
+  justify-content: center;
   background-color: ${({ theme }) => theme.forum.topicCard.background};
   margin-bottom: 1rem;
-  padding: 0.5rem;
-  border-radius: 8px;
-  border: 2px solid transparent;
-  transition: border 0.3s;
+  padding: 0.5rem 1rem;
+  border-radius: 12px;
+  border: 2px solid ${({ theme }) => theme.primaryLight};
+  box-shadow: 0 2px 8px rgba(60,72,88,0.07);
   width: 100%;
+  max-width: 480px;
+  margin-left: auto;
+  margin-right: auto;
+  transition: border 0.3s, box-shadow 0.3s;
 
-  &:hover {
-    border: 2px solid #7c3aed;
-  }
-
-  &:focus-within {
-    border: 2px solid #7c3aed;
-    box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.2);
+  &:hover, &:focus-within {
+    border: 2px solid ${({ theme }) => theme.primary};
+    box-shadow: 0 4px 16px rgba(124, 58, 237, 0.08);
   }
 
   @media (max-width: 768px) {
-    padding: 0.75rem;
+    padding: 0.75rem 0.75rem;
     margin-bottom: 0.75rem;
+    max-width: 100%;
   }
 
   @media (max-width: 480px) {
-    padding: 0.5rem;
+    padding: 0.5rem 0.5rem;
     margin-bottom: 0.5rem;
+    max-width: 100%;
   }
 `;
 

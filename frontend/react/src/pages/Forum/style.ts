@@ -1,4 +1,3 @@
-import { rgba } from "polished";
 import styled from "styled-components";
 
 export const ForumContainer = styled.div`
@@ -91,12 +90,20 @@ export const TopicCard = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  transition: background 0.3s;
+  transition: background 0.3s, box-shadow 0.2s, border-color 0.2s, transform 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+  box-shadow: ${({ theme }) => theme.shadow.sm};
+  border: 1.5px solid ${({ theme }) => theme.forum.topicCard.border};
   gap: 12px;
 
   &:hover {
-    background: ${({ theme }) => rgba(theme.forum.topicCard.background, 0.5)};
+    background: ${({ theme }) => theme.forum.topicCard.backgroundHover};
+    box-shadow: ${({ theme }) => theme.shadow.md};
+    border-color: ${({ theme }) => theme.primaryLight};
+    transform: translateY(-6px) scale(1.02);
     cursor: pointer;
+  }
+  &:active {
+    transform: translateY(2px) scale(0.98);
   }
 
   @media (max-width: 768px) {
