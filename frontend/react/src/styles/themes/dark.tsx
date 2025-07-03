@@ -1,4 +1,5 @@
 export const darkTheme = {
+  name: "dark",
   // Backgrounds
   background: "#121212",
   cardBackground: "#1e1e1e",
@@ -100,4 +101,6 @@ export const darkTheme = {
     disabled: "#23272f",
     disabledText: "#71717a",
   },
+
+  secondary: "#18181b",
 }

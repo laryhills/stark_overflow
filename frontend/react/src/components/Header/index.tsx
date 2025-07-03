@@ -11,7 +11,7 @@ interface HeaderProps {
 
 export function Header({ toggleTheme }: HeaderProps) {
   const theme = useTheme();
-  const isLight = theme.background === "#f7f8fa";
+  const isLight = theme.name === "light";
 
   return (
     <HeaderContainer>

@@ -27,11 +27,6 @@ declare module "styled-components" {
     primaryActive: string
     primaryLight: string
     
-    // Secondary colors
-    secondary: string
-    secondaryHover: string
-    secondaryActive: string
-    
     // Interactive elements
     connectBg: string
     connectText: string
@@ -111,5 +106,7 @@ declare module "styled-components" {
       lg: string
       xl: string
     }
+    
+    secondary: string
   }
 }

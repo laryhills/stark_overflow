@@ -1,4 +1,5 @@
 export const lightTheme = {
+  name: "light",
   // Backgrounds
   background: "#f7f8fa", // Soft, not pure white
   cardBackground: "#ffffff",
@@ -100,4 +101,6 @@ export const lightTheme = {
     disabled: "#f3f6fa",
     disabledText: "#a0aec0",
   },
+
+  secondary: "#f3f6fa", // matches cardBackgroundSecondary
 }
