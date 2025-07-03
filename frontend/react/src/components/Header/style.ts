@@ -102,7 +102,7 @@ export const ConnectButtonContainer = styled.div`
 `;
 
 export const StyledButton = styled.button`
-  background: ${(props) => {
+   background: ${(props) => {
     console.log('StyledButton theme:', props.theme);
     return props.theme?.button?.primary?.background || 'red';
   }};
