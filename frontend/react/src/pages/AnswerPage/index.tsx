@@ -15,7 +15,6 @@ import { QuestionDetailContainer, StatusMessage } from "./styles"
 import { useStatusMessage } from "@hooks/useStatusMessage"
 import { useContract } from "@hooks/useContract"
 import { Question as QuestionType } from "@app-types/index"
-import { useAccount } from "@starknet-react/core"
 import { AnswerEditorProvider } from "./AnswerEditor/useAnswerEditor/answerEditor.provider"
 
 export function AnswerPage() {
@@ -30,8 +29,6 @@ function AnswerPageContent() {
   const params = useParams<{ questionId: string }>()
   const questionId = Number(params.questionId)
   const { statusMessage } = useStatusMessage()
-  const { isConnected } = useAccount()
-
 
   const [question, setQuestion] = useState<QuestionType | null>(null)
 
@@ -58,18 +55,18 @@ function AnswerPageContent() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [questionId, contractReady])
 
-  if (!isConnected || !contractReady) {
+  if (!contractReady) {
     return (
       <QuestionDetailContainer>
         <div style={{ padding: "20px", textAlign: "center" }}>
-          <p>Please connect your wallet to view this question</p>
+          <p>Contract not ready. Please try again later.</p>
         </div>
       </QuestionDetailContainer>
     )
   }
 
   // Show loading state
-  if (questionLoading || !contractReady) {
+  if (questionLoading) {
     return (
       <QuestionDetailContainer>
         <div style={{ padding: "20px", textAlign: "center" }}>
