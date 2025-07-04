@@ -28,7 +28,7 @@ const generateMockRepository = (): string => {
     "https://github.com/starknet-community/starknet-js",
     "https://github.com/xJonathanLEI/starkli",
     "https://github.com/MullerEsposito/stark_overflow",
-    ""
+    "",
   ]
   return repos[Math.floor(Math.random() * repos.length)]
 }
@@ -47,7 +47,7 @@ const generateMockAuthorName = (address: string): string => {
 export const contractQuestionToFrontend = (contractQuestion: ContractQuestion): Question => {
   const authorAddress = formatters.bigIntToAddress(contractQuestion.author)
   const status = formatters.formatStatus(contractQuestion.status)
-  const authorName = generateMockAuthorName(authorAddress)  
+  const authorName = generateMockAuthorName(authorAddress)
   const weiValue = formatters.bigIntToNumber(contractQuestion.value)
   const decimalValue = formatters.convertWeiToDecimal(weiValue)
 
@@ -60,10 +60,10 @@ export const contractQuestionToFrontend = (contractQuestion: ContractQuestion): 
     authorAddress: authorAddress,
     authorName,
     timestamp: generateMockTimestamp(),
-    stakeAmount: decimalValue.toFixed(2),
+    stakeAmount: decimalValue,
     tags: generateMockTags(),
     repositoryUrl: generateMockRepository(),
-    isOpen: status === "Open"
+    isOpen: status === "Open",
   }
 }
 
@@ -78,7 +78,6 @@ export const contractAnswerToFrontend = (contractAnswer: ContractAnswer, isCorre
     content: contractAnswer.description,
     timestamp: generateMockTimestamp(),
     isCorrect,
-    votes: Math.floor(Math.random() * 10) // Random votes for now
+    votes: Math.floor(Math.random() * 10), // Random votes for now
   }
 }
-
