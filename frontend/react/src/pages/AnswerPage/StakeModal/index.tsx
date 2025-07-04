@@ -34,7 +34,6 @@ interface StakeModalProps {
 export function StakeModal({ question, setQuestion }: StakeModalProps) {
   const [amount, setAmount] = useState("")
   const [error, setError] = useState<string | null>(null)
-  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const amountInWei = formatters.convertStringDecimalToWei(amount);
   const scaledAmount = cairo.uint256(amountInWei);
@@ -50,6 +49,7 @@ export function StakeModal({ question, setQuestion }: StakeModalProps) {
   const {
     addFundsToQuestion,
     stakingError,
+    stakingLoading,
     clearStakingError
   } = useContract()
 
@@ -67,8 +67,6 @@ export function StakeModal({ question, setQuestion }: StakeModalProps) {
       setError("Please enter a valid amount")
       return
     }
-
-    setIsSubmitting(true)
 
     try {
       const success = await addFundsToQuestion(Number(question.id), scaledAmount)
@@ -92,7 +90,6 @@ export function StakeModal({ question, setQuestion }: StakeModalProps) {
         })
         setIsStakeModalOpen(false)
       } else {
-        setIsSubmitting(false)
         setStatusMessage({
           type: "error",
           message: "Failed to add stake. Please try again.",
@@ -105,7 +102,6 @@ export function StakeModal({ question, setQuestion }: StakeModalProps) {
         message: "Failed to add stake. Please try again.",
       })
     } finally {
-      setIsSubmitting(false)
       // Clear status message after 5 seconds
       setTimeout(() => {
         setStatusMessage({ type: null, message: "" })
@@ -170,7 +166,7 @@ export function StakeModal({ question, setQuestion }: StakeModalProps) {
 
   return (
     <ModalOverlay onClick={handleClose}>
-      {isSubmitting && <LoadingSpinner />}
+      {stakingLoading && <LoadingSpinner />}
       <ModalContent onClick={(e) => e.stopPropagation()}>
         <ModalHeader>
           <ModalTitle>Add Stake to Question</ModalTitle>
@@ -198,14 +194,14 @@ export function StakeModal({ question, setQuestion }: StakeModalProps) {
               onChange={handleAmountChange}
               placeholder="0.00"
               autoFocus
-              disabled={isSubmitting}
+              disabled={stakingLoading}
             />
           </InputContainer>
 
           {error && <ErrorMessage>{error}</ErrorMessage>}
 
-          <StakeButton onClick={handleSubmit} disabled={isSubmitting}>
-            {isSubmitting ? "Processing..." : "Add Stake"}
+          <StakeButton onClick={handleSubmit} disabled={stakingLoading}>
+            {stakingLoading ? "Processing..." : "Add Stake"}
           </StakeButton>
         </ModalBody>
       </ModalContent>
