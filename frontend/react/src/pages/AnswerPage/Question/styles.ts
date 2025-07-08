@@ -370,3 +370,13 @@ export const ActionButton = styled.button`
     font-size: 0.8rem;
   }
 `
+export const StarkOverflowToken = styled.img`
+  width: 1.8rem;
+`;
+
+export const StakeAmount = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 30px;
+`;

@@ -112,7 +112,7 @@ function AnswerPageContent() {
   }
 
   // Show loading state
-  if (questionLoading || !contractReady) {
+  if (questionLoading) {
     return (
       <QuestionDetailContainer>
         <div style={{ padding: "20px", textAlign: "center" }}>
@@ -237,7 +237,7 @@ function AnswerPageContent() {
             </AnswerEditorProvider>
           )}
         </AnswersProvider>
-        
+
         {statusMessage?.type && (
           <StatusMessage type={statusMessage.type}>
             {statusMessage.message}
