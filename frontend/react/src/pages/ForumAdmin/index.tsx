@@ -5,6 +5,8 @@ import { useWallet } from "@hooks/useWallet";
 import { useAccount } from "@starknet-react/core";
 import { CircleNotch, Warning } from "phosphor-react";
 import { Button } from "./style";
+import { InputForm } from "@components/InputForm";
+import { FormContainer } from "@components/Form";
 
 
 
@@ -18,6 +20,8 @@ export function ForumAdmin() {
   const [ownershipChecked, setOwnershipChecked] = useState(false);
   const [imageError, setImageError] = useState(false)
   const [imageLoaded, setImageLoaded] = useState(false)
+  const [errors, setErrors] = useState<Record<string, string>>({})
+
 
   const navigate = useNavigate();
   const { isConnected } = useAccount();
@@ -66,6 +70,18 @@ export function ForumAdmin() {
     }
   }, [isConnected, address, contractReady, checkIsOwner]);
 
+
+  const validateForm = () => {
+    const newErrors: Record<string, string> = {}
+    if (!name.trim()) newErrors.name = "Name is required"
+    else if (name.length < 3) newErrors.name = "Name should be at least 3 characters"
+    if (!iconUrl.trim()) newErrors.iconUrl = "Icon URL is required"
+    else if (!iconUrl.startsWith('http')) newErrors.iconUrl = "Icon URL must be a valid URL"
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
+
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -81,15 +97,7 @@ export function ForumAdmin() {
       return;
     }
 
-    if (!name.trim()) {
-      setError("Forum name is required");
-      return;
-    }
-
-    if (!iconUrl.trim()) {
-      setError("Icon URL is required");
-      return;
-    }
+    if (!validateForm()) return
 
     if (imageError) {
       setError("Please provide a valid image URL")
@@ -145,20 +153,6 @@ export function ForumAdmin() {
       <div style={{ padding: "20px", textAlign: "center" }}>
         <h1>Create Forum</h1>
         <p>Please connect your wallet to create a forum</p>
-        <button
-          onClick={openConnectModal}
-          style={{
-            padding: "10px 20px",
-            backgroundColor: "#007bff",
-            color: "white",
-            border: "none",
-            borderRadius: "5px",
-            cursor: "pointer",
-            marginTop: "10px"
-          }}
-        >
-          Connect Wallet
-        </button>
       </div>
     );
   }
@@ -188,50 +182,30 @@ export function ForumAdmin() {
 
   return (
     <div style={{ padding: "20px", maxWidth: "600px", margin: "0 auto" }}>
-      <h1>Create New Forum</h1>
+      <h1 style={{ marginBottom: "20px" }}>Create New Forum</h1>
 
-      <form onSubmit={handleSubmit} style={{ marginTop: "20px" }}>
-        <div style={{ marginBottom: "20px" }}>
-          <label htmlFor="name" style={{ display: "block", marginBottom: "5px", fontWeight: "bold" }}>
-            Forum Name *
-          </label>
-          <input
-            id="name"
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Enter forum name (e.g., ReactJS, Python, etc.)"
-            style={{
-              width: "100%",
-              padding: "10px",
-              border: "1px solid #ddd",
-              borderRadius: "5px",
-              fontSize: "16px"
-            }}
-            required
-          />
-        </div>
+      <FormContainer onSubmit={handleSubmit}>
+        <InputForm
+          id="name"
+          label="Name"
+          tooltipText="The name of the forum"
+          placeholder="Enter forum name (e.g., ReactJS, Python, etc.)"
+          error={errors.name}
+          value={name}
+          validateForm={validateForm}
+          setValue={setName}
+        />
 
-        <div style={{ marginBottom: "20px" }}>
-          <label htmlFor="iconUrl" style={{ display: "block", marginBottom: "5px", fontWeight: "bold" }}>
-            Icon URL *
-          </label>
-          <input
-            id="iconUrl"
-            type="url"
-            value={iconUrl}
-            onChange={(e) => setIconUrl(e.target.value)}
-            placeholder="Enter icon URL (e.g., https://example.com/icon.png)"
-            style={{
-              width: "100%",
-              padding: "10px",
-              border: "1px solid #ddd",
-              borderRadius: "5px",
-              fontSize: "16px"
-            }}
-            required
-          />
-        </div>
+        <InputForm
+          id="iconUrl"
+          label="Icon URL"
+          tooltipText="The URL of the forum icon"
+          placeholder="Enter icon URL (e.g., https://example.com/icon.png)"
+          error={errors.iconUrl}
+          value={iconUrl}
+          validateForm={validateForm}
+          setValue={setIconUrl}
+        />
 
         {iconPreview && (
           <div style={{ marginBottom: "20px" }}>
@@ -262,7 +236,7 @@ export function ForumAdmin() {
           </div>
         )}
 
-        <div style={{ marginBottom: "20px", display: "flex", justifyContent: "flex-end", gap: "10px" }}>
+        <div className="buttons">
           <Button variant="cancel" type="button"
             onClick={() => navigate("/")}>
             Cancel
@@ -271,7 +245,7 @@ export function ForumAdmin() {
             {isLoading ? "Creating Forum..." : "Create Forum"}
           </Button>
         </div>
-      </form>
+      </FormContainer>
 
       {error && (
         <div style={{

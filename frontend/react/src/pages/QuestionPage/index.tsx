@@ -6,9 +6,9 @@ import { PaperPlaneRight, Link as LinkIcon, Tag, CurrencyDollar, Buildings } fro
 import { Container, Form, Button, TransactionStatus } from "./style"
 import { NavLink, useNavigate, useParams } from "react-router-dom"
 import { useAccount, useSendTransaction } from "@starknet-react/core"
-import { InputForm } from "./InputForm"
+import { InputForm } from "../../components/InputForm"
 import { EditorForm } from "./EditorForm"
-import { TagInput } from "./TagInput"
+import { TagInput } from "../../components/TagInput"
 import { useWallet } from "@hooks/useWallet"
 import { useContract } from "@hooks/useContract"
 import { shortenAddress } from "@utils/shortenAddress"
@@ -59,14 +59,14 @@ export function QuestionPage() {
   const tokenAddress = import.meta.env.VITE_TOKEN_ADDRESS
 
   const { sendAsync: askQuestion, isPending: isTransactionPending, data: transactionData, error: transactionError } = useSendTransaction({
-    calls: contract && contractReady && tokenAddress && description && amount && Number(scaledAmount.low) > 0 && title && forumName
+    calls: contract && contractReady && tokenAddress && description && amount && Number(scaledAmount.low) > 0 && title && forum?.id
       ? [{
         contractAddress: tokenAddress,
         entrypoint: "approve",
         calldata: [contract.address, scaledAmount.low, scaledAmount.high],
       },
       contract.populate("ask_question", [
-        BigInt(forumName), // forum_id (convert forum name to ID)
+        BigInt(forum.id),
         title,
         description,
         repository,
