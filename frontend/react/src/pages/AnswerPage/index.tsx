@@ -46,6 +46,7 @@ function AnswerPageContent() {
     if (questionId && contractReady) {
       const loadQuestion = async () => {
         const contractQuestion = await fetchQuestion(questionId)
+        console.log("contractQuestion", contractQuestion)
         if (contractQuestion) {
           setQuestion(contractQuestion)
           setRetryAttempts(0) // Reset retry attempts on success
@@ -78,7 +79,7 @@ function AnswerPageContent() {
             <li>Contract address is incorrect</li>
           </ul>
           <div>
-            <button 
+            <button
               onClick={handleRetry}
               style={{
                 padding: "10px 20px",
@@ -92,7 +93,7 @@ function AnswerPageContent() {
             >
               Retry Connection
             </button>
-            <button 
+            <button
               onClick={() => window.location.reload()}
               style={{
                 padding: "10px 20px",
@@ -117,7 +118,7 @@ function AnswerPageContent() {
       <QuestionDetailContainer>
         <div style={{ padding: "20px", textAlign: "center" }}>
           <div style={{ marginBottom: "10px" }}>
-            <div 
+            <div
               style={{
                 width: "40px",
                 height: "40px",
@@ -141,17 +142,17 @@ function AnswerPageContent() {
       <QuestionDetailContainer>
         <div style={{ padding: "20px", textAlign: "center" }}>
           <h3>Error Loading Question</h3>
-          <div style={{ 
-            backgroundColor: "#f8d7da", 
-            color: "#721c24", 
-            padding: "15px", 
-            borderRadius: "5px", 
+          <div style={{
+            backgroundColor: "#f8d7da",
+            color: "#721c24",
+            padding: "15px",
+            borderRadius: "5px",
             margin: "20px 0",
             border: "1px solid #f5c6cb"
           }}>
             <strong>Error:</strong> {questionError}
           </div>
-          
+
           {questionError.includes("Contract not found") && (
             <div style={{ marginBottom: "20px", textAlign: "left", display: "inline-block" }}>
               <h4>Possible Solutions:</h4>
@@ -165,7 +166,7 @@ function AnswerPageContent() {
           )}
 
           <div>
-            <button 
+            <button
               onClick={handleRetry}
               style={{
                 padding: "10px 20px",
@@ -179,7 +180,7 @@ function AnswerPageContent() {
             >
               Retry ({retryAttempts + 1})
             </button>
-            <button 
+            <button
               onClick={() => window.location.reload()}
               style={{
                 padding: "10px 20px",
@@ -205,7 +206,7 @@ function AnswerPageContent() {
         <div style={{ padding: "20px", textAlign: "center" }}>
           <h3>Question Not Found</h3>
           <p>The question with ID {questionId} could not be found.</p>
-          <button 
+          <button
             onClick={handleRetry}
             style={{
               padding: "10px 20px",
