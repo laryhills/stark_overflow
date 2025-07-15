@@ -84,8 +84,8 @@ pub mod StarkOverflow {
   }
 
   #[constructor]
-  fn constructor(ref self: ContractState, stark_token_address: ContractAddress) {
-    self.ownable.initializer(get_caller_address());
+  fn constructor(ref self: ContractState, owner: ContractAddress, stark_token_address: ContractAddress) {
+    self.ownable.initializer(owner);
     self.stark_token_dispatcher.write(IERC20Dispatcher { 
       contract_address: stark_token_address 
     });
@@ -113,7 +113,7 @@ pub mod StarkOverflow {
       let mut forums = array![];
       let number_of_forums = self.last_forum_id.read();
 
-      for i in 0..number_of_forums {
+      for i in 1..number_of_forums + 1 {
         let forum = self.forum_by_id.entry(i).read();
         forums.append(forum);
       };
