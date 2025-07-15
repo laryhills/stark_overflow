@@ -43,7 +43,8 @@ export function Home() {
     } else {
       setIsOwner(false);
     }
-  }, [isConnected, address, contractReady, checkIsOwner]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isConnected, address, contractReady]);
 
   const handleSearch = (searchTerm: string) => {
     if (searchTerm === '') {
