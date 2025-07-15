@@ -44,6 +44,34 @@ fn it_should_be_able_to_create_a_forum() {
 }
 
 #[test]
+fn it_should_be_able_to_retrieve_all_forums() {
+  let (_, stark_token_address) = deploy_mock_stark_token();
+  let (starkoverflow_dispatcher, _) = deploy_starkoverflow_contract(stark_token_address);
+
+  let starkoverflow_contract_address = starkoverflow_dispatcher.contract_address;
+  let ownable_dispatcher = IOwnableDispatcher { contract_address: starkoverflow_contract_address };
+  let owner = ownable_dispatcher.owner();
+
+  let forum_name_1 = "Forum of test 1";
+  let forum_icon_url_1 = "https://example.com/icon.png";
+  let forum_name_2 = "Forum of test 2";
+  let forum_icon_url_2 = "https://example.com/icon.png";
+  
+  cheat_caller_address(starkoverflow_contract_address, owner, CheatSpan::TargetCalls(2));
+  starkoverflow_dispatcher.create_forum(forum_name_1.clone(), forum_icon_url_1.clone());
+  starkoverflow_dispatcher.create_forum(forum_name_2.clone(), forum_icon_url_2.clone());
+
+  let forums = starkoverflow_dispatcher.get_forums();
+  assert_eq!(forums.len(), 2);
+  assert_eq!(forums[0].id, @1);
+  assert_eq!(forums[1].id, @2);
+  assert_eq!(forums[0].name, @forum_name_1);
+  assert_eq!(forums[1].name, @forum_name_2);
+  assert_eq!(forums[0].icon_url, @forum_icon_url_1);
+  assert_eq!(forums[1].icon_url, @forum_icon_url_2);
+}
+
+#[test]
 fn it_should_be_able_to_ask_a_question() {
   let asker = ADDRESSES::ASKER.get();
 
@@ -225,16 +253,16 @@ fn it_should_be_able_to_retrive_all_answers_for_a_question() {
   let question_id = ask_question(starkoverflow_dispatcher, stark_token_dispatcher, forum_id);
 
   let answer_description_1 = "Answer of test.";
-  let answer_id_1 = submit_answer(starkoverflow_dispatcher, starkoverflow_contract_address, question_id, answer_description_1.clone());
+  submit_answer(starkoverflow_dispatcher, starkoverflow_contract_address, question_id, answer_description_1.clone());
   let answer_description_2 = "Another answer of test.";
-  let answer_id_2 = submit_answer(starkoverflow_dispatcher, starkoverflow_contract_address, question_id, answer_description_2.clone());
+  submit_answer(starkoverflow_dispatcher, starkoverflow_contract_address, question_id, answer_description_2.clone());
 
   let answers = starkoverflow_dispatcher.get_answers(question_id);
 
   assert_eq!(answers.len(), 2);
-  assert_eq!(*answers.at(0).id, answer_id_1);
+  assert_eq!(*answers.at(0).id, 1);
   assert_eq!(answers.at(0).description, @answer_description_1);
-  assert_eq!(*answers.at(1).id, answer_id_2);
+  assert_eq!(*answers.at(1).id, 2);
   assert_eq!(answers.at(1).description, @answer_description_2);
 }
 
