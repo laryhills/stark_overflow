@@ -35,7 +35,6 @@ export function ForumAdmin() {
     address
   } = useContract();
 
-  // Fix: Create a more robust icon preview with proper dependency tracking
   const iconPreview = useMemo(() => {
     if (!iconUrl.trim()) return null
 
@@ -68,7 +67,8 @@ export function ForumAdmin() {
       setIsOwner(false);
       setOwnershipChecked(true);
     }
-  }, [isConnected, address, contractReady, checkIsOwner]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isConnected, address, contractReady]);
 
 
   const validateForm = () => {

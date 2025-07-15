@@ -16,6 +16,7 @@ import { useStatusMessage } from "@hooks/useStatusMessage"
 import { useContract } from "@hooks/useContract"
 import { Question as QuestionType } from "@app-types/index"
 import { AnswerEditorProvider } from "./AnswerEditor/useAnswerEditor/answerEditor.provider"
+import { LoadingSpinner } from "@components/LoadingSpinner"
 
 export function AnswerPage() {
   return (
@@ -116,22 +117,7 @@ function AnswerPageContent() {
   if (questionLoading) {
     return (
       <QuestionDetailContainer>
-        <div style={{ padding: "20px", textAlign: "center" }}>
-          <div style={{ marginBottom: "10px" }}>
-            <div
-              style={{
-                width: "40px",
-                height: "40px",
-                border: "4px solid #f3f3f3",
-                borderTop: "4px solid #007bff",
-                borderRadius: "50%",
-                animation: "spin 1s linear infinite",
-                margin: "0 auto"
-              }}
-            />
-          </div>
-          <p>{!contractReady ? "Initializing contract..." : "Loading question..."}</p>
-        </div>
+        <LoadingSpinner message={!contractReady ? "Initializing contract..." : "Loading question..."} />
       </QuestionDetailContainer>
     )
   }
