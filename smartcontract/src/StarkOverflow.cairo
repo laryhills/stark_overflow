@@ -7,6 +7,8 @@ use starknet::ContractAddress;
 pub trait IStarkOverflow<T> {
   // Forums
   fn create_forum(ref self: T, name: ByteArray, icon_url: ByteArray) -> u256;
+  fn delete_forum(ref self: T, forum_id: u256);
+  fn update_forum(ref self: T, forum_id: u256, name: ByteArray, icon_url: ByteArray);
   fn get_forum(self: @T, forum_id: u256) -> Forum;
   fn get_forums(self: @T) -> Array<Forum>;
 
@@ -97,12 +99,27 @@ pub mod StarkOverflow {
       self.ownable.assert_only_owner();
 
       let forum_id = self.last_forum_id.read() + 1;
-      let forum = Forum { id: forum_id, name, icon_url, amount: 0, total_questions: 0 };
+      let forum = Forum { id: forum_id, name, icon_url, amount: 0, total_questions: 0, deleted: false };
 
       self.forum_by_id.entry(forum_id).write(forum);
       self.last_forum_id.write(forum_id);
 
       forum_id
+    }
+
+    fn delete_forum(ref self: ContractState, forum_id: u256) {
+      self.ownable.assert_only_owner();
+
+      let forum = self.forum_by_id.entry(forum_id);
+      forum.deleted.write(true);
+    }
+
+    fn update_forum(ref self: ContractState, forum_id: u256, name: ByteArray, icon_url: ByteArray) {
+      self.ownable.assert_only_owner();
+
+      let forum = self.forum_by_id.entry(forum_id);
+      forum.name.write(name);
+      forum.icon_url.write(icon_url);
     }
 
     fn get_forum(self: @ContractState, forum_id: u256) -> Forum {
@@ -115,7 +132,9 @@ pub mod StarkOverflow {
 
       for i in 1..number_of_forums + 1 {
         let forum = self.forum_by_id.entry(i).read();
-        forums.append(forum);
+        if forum.deleted == false {
+          forums.append(forum);
+        }
       };
 
       forums
