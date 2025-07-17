@@ -130,6 +130,10 @@ pub mod StarkOverflow {
       
       self.stark_token_dispatcher().transfer_from(caller, get_contract_address(), amount);
 
+      let found_forum = self.forum_by_id.entry(forum_id);
+      found_forum.amount.write(found_forum.amount.read() + amount);
+      found_forum.total_questions.write(found_forum.total_questions.read() + 1);
+
       let question = self.question_by_id.entry(question_id);
       question.id.write(question_id);
       question.forum_id.write(forum_id);
@@ -261,7 +265,10 @@ pub mod StarkOverflow {
       self.staked_in_question_by_user.write((caller, question_id), new_stake);
       
       let total_staked = self.total_staked_by_question_id.read(question_id);
-      self.total_staked_by_question_id.write(question_id, total_staked + amount);            
+      self.total_staked_by_question_id.write(question_id, total_staked + amount);
+
+      let found_forum = self.forum_by_id.entry(found_question.forum_id.read());
+      found_forum.amount.write(found_forum.amount.read() + amount);
       
       self.emit(QuestionStaked { staker: caller, question_id, amount });
     }

@@ -102,6 +102,7 @@ fn it_should_be_able_to_ask_a_question() {
   );  
 
   let question = starkoverflow_dispatcher.get_question(question_id);
+  let forum = starkoverflow_dispatcher.get_forum(forum_id);
 
   assert_eq!(question.id, question_id);
   assert_eq!(question.forum_id, forum_id);
@@ -110,6 +111,9 @@ fn it_should_be_able_to_ask_a_question() {
   assert_eq!(question.amount, amount);
   assert_eq!(question.repository_url, repository_url);
   assert_eq!(question.tags, tags);
+
+  assert_eq!(forum.amount, amount);
+  assert_eq!(forum.total_questions, 1);
 
   let total_staked = starkoverflow_dispatcher.get_total_staked_on_question(question_id);
   assert_eq!(total_staked, amount);
@@ -140,6 +144,9 @@ fn it_should_be_able_to_add_funds_to_a_question() {
 
   question = starkoverflow_dispatcher.get_question(question_id);
   assert_eq!(question.amount, question_initial_amount + additionally_funds);
+
+  let forum = starkoverflow_dispatcher.get_forum(forum_id);
+  assert_eq!(forum.amount, question_initial_amount + additionally_funds);
 
   let final_balance = stark_token_dispatcher.balance_of(starkoverflow_contract_address);
   assert_eq!(final_balance, question_initial_amount + additionally_funds);
