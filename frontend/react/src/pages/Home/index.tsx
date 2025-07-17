@@ -5,6 +5,7 @@ import { SearchInput } from "../../components/SearchInput";
 import { useContract } from "@hooks/useContract";
 import { Forum } from "@app-types/index";
 import { Link } from "react-router-dom";
+import { LoadingSpinner } from "@components/LoadingSpinner";
 
 export function Home() {
   const [forumsList, setForumsList] = useState<Forum[]>([]);
@@ -43,7 +44,8 @@ export function Home() {
     } else {
       setIsOwner(false);
     }
-  }, [isConnected, address, contractReady, checkIsOwner]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isConnected, address, contractReady]);
 
   const handleSearch = (searchTerm: string) => {
     if (searchTerm === '') {
@@ -61,9 +63,7 @@ export function Home() {
     return (
       <HomeContainer>
         <h1>Fóruns</h1>
-        <div style={{ padding: "20px", textAlign: "center" }}>
-          <p>Loading forums...</p>
-        </div>
+        <LoadingSpinner message={!contractReady ? "Initializing contract..." : "Loading forums..."} />
       </HomeContainer>
     );
   }

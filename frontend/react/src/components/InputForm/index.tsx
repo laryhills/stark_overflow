@@ -34,6 +34,7 @@ export function InputForm({ label, tooltipText, error, value, id, placeholder, d
           value={value}
           disabled={disabled}
           onChange={(e) => setValue(e.target.value)}
+          onKeyUp={() => validateForm && validateForm()}
           onBlur={() => validateForm && validateForm()}
         />
       </InputContainer>
