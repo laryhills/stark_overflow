@@ -59,6 +59,12 @@ export function Home() {
     setFilteredForums(filtered);
   };
 
+  const handleForumDeleted = (deletedForumId: string) => {
+    // Remove the deleted forum from both lists
+    setForumsList(prev => prev.filter(forum => forum.id !== deletedForumId));
+    setFilteredForums(prev => prev.filter(forum => forum.id !== deletedForumId));
+  };
+
   if (forumsLoading) {
     return (
       <HomeContainer>
@@ -99,7 +105,11 @@ export function Home() {
         )}
       </div>
       {filteredForums.length > 6 && <SearchInput onSearch={handleSearch} />}
-      <Cards forums={filteredForums} />
+      <Cards
+        forums={filteredForums}
+        isOwner={isOwner}
+        onForumDeleted={handleForumDeleted}
+      />
     </HomeContainer>
   );
 }

@@ -322,6 +322,14 @@ export function ContractProvider({ children }: ContractProviderProps) {
     calls: undefined,
   })
 
+  const { sendAsync: updateForumSendAsync } = useSendTransaction({
+    calls: undefined,
+  })
+
+  const { sendAsync: deleteForumSendAsync } = useSendTransaction({
+    calls: undefined,
+  })
+
   const createForum = useCallback(async (name: string, iconUrl: string): Promise<string | null> => {
     const contractInstance = getContractForWriting()
     if (!contractInstance || !isConnected) {
@@ -355,6 +363,74 @@ export function ContractProvider({ children }: ContractProviderProps) {
       return null
     }
   }, [getContractForWriting, isConnected, createForumSendAsync])
+
+  const updateForum = useCallback(async (forumId: string, name: string, iconUrl: string): Promise<string | null> => {
+    const contractInstance = getContractForWriting()
+    if (!contractInstance || !isConnected) {
+      setForumsState({
+        isLoading: false,
+        error: "Contract not initialized or wallet not connected",
+        transactionHash: null
+      })
+      return null
+    }
+
+    setForumsState({ isLoading: true, error: null, transactionHash: null })
+
+    try {
+      const transaction = [contractInstance.populate("update_forum", [BigInt(forumId), name, iconUrl])]
+      const response = await updateForumSendAsync(transaction)
+
+      if (response) {
+        setForumsState({
+          isLoading: false,
+          error: null,
+          transactionHash: response.transaction_hash || null
+        })
+        return response.transaction_hash || null
+      }
+
+      return null
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Failed to update forum"
+      setForumsState({ isLoading: false, error: errorMessage, transactionHash: null })
+      return null
+    }
+  }, [getContractForWriting, isConnected, updateForumSendAsync])
+
+  const deleteForum = useCallback(async (forumId: string): Promise<string | null> => {
+    const contractInstance = getContractForWriting()
+    if (!contractInstance || !isConnected) {
+      setForumsState({
+        isLoading: false,
+        error: "Contract not initialized or wallet not connected",
+        transactionHash: null
+      })
+      return null
+    }
+
+    setForumsState({ isLoading: true, error: null, transactionHash: null })
+
+    try {
+      const transaction = [contractInstance.populate("delete_forum", [BigInt(forumId)])]
+      const response = await deleteForumSendAsync(transaction)
+
+      if (response) {
+        setForumsState({
+          isLoading: false,
+          error: null,
+          transactionHash: response.transaction_hash || null
+        })
+        return response.transaction_hash || null
+      }
+
+      return null
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Failed to delete forum"
+      setForumsState({ isLoading: false, error: errorMessage, transactionHash: null })
+      return null
+    }
+  }, [getContractForWriting, isConnected, deleteForumSendAsync])
 
   const checkIsOwner = useCallback(async (): Promise<boolean> => {
     const contractInstance = getContractForReading()
@@ -408,6 +484,8 @@ export function ContractProvider({ children }: ContractProviderProps) {
       fetchForums,
       fetchForum,
       createForum,
+      updateForum,
+      deleteForum,
       checkIsOwner,
       clearQuestionError,
       clearAnswersError,

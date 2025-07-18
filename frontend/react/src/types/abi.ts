@@ -37,6 +37,20 @@ export const ABI = [
     ]
   },
   {
+    "type": "enum",
+    "name": "core::bool",
+    "variants": [
+      {
+        "name": "False",
+        "type": "()"
+      },
+      {
+        "name": "True",
+        "type": "()"
+      }
+    ]
+  },
+  {
     "type": "struct",
     "name": "stark_overflow::structs::CommonStructs::Forum",
     "members": [
@@ -59,6 +73,10 @@ export const ABI = [
       {
         "name": "total_questions",
         "type": "core::integer::u256"
+      },
+      {
+        "name": "deleted",
+        "type": "core::bool"
       }
     ]
   },
@@ -162,6 +180,38 @@ export const ABI = [
             "type": "core::integer::u256"
           }
         ],
+        "state_mutability": "external"
+      },
+      {
+        "type": "function",
+        "name": "delete_forum",
+        "inputs": [
+          {
+            "name": "forum_id",
+            "type": "core::integer::u256"
+          }
+        ],
+        "outputs": [],
+        "state_mutability": "external"
+      },
+      {
+        "type": "function",
+        "name": "update_forum",
+        "inputs": [
+          {
+            "name": "forum_id",
+            "type": "core::integer::u256"
+          },
+          {
+            "name": "name",
+            "type": "core::byte_array::ByteArray"
+          },
+          {
+            "name": "icon_url",
+            "type": "core::byte_array::ByteArray"
+          }
+        ],
+        "outputs": [],
         "state_mutability": "external"
       },
       {
@@ -400,11 +450,11 @@ export const ABI = [
   {
     "type": "impl",
     "name": "OwnableMixinImpl",
-    "interface_name": "openzeppelin::access::ownable::interface::OwnableABI"
+    "interface_name": "openzeppelin_access::ownable::interface::OwnableABI"
   },
   {
     "type": "interface",
-    "name": "openzeppelin::access::ownable::interface::OwnableABI",
+    "name": "openzeppelin_access::ownable::interface::OwnableABI",
     "items": [
       {
         "type": "function",
@@ -462,7 +512,7 @@ export const ABI = [
     "name": "constructor",
     "inputs": [
       {
-        "name": "initial_owner",
+        "name": "owner",
         "type": "core::starknet::contract_address::ContractAddress"
       },
       {
@@ -620,7 +670,7 @@ export const ABI = [
   },
   {
     "type": "event",
-    "name": "openzeppelin::access::ownable::ownable::OwnableComponent::OwnershipTransferred",
+    "name": "openzeppelin_access::ownable::ownable::OwnableComponent::OwnershipTransferred",
     "kind": "struct",
     "members": [
       {
@@ -637,7 +687,7 @@ export const ABI = [
   },
   {
     "type": "event",
-    "name": "openzeppelin::access::ownable::ownable::OwnableComponent::OwnershipTransferStarted",
+    "name": "openzeppelin_access::ownable::ownable::OwnableComponent::OwnershipTransferStarted",
     "kind": "struct",
     "members": [
       {
@@ -654,17 +704,17 @@ export const ABI = [
   },
   {
     "type": "event",
-    "name": "openzeppelin::access::ownable::ownable::OwnableComponent::Event",
+    "name": "openzeppelin_access::ownable::ownable::OwnableComponent::Event",
     "kind": "enum",
     "variants": [
       {
         "name": "OwnershipTransferred",
-        "type": "openzeppelin::access::ownable::ownable::OwnableComponent::OwnershipTransferred",
+        "type": "openzeppelin_access::ownable::ownable::OwnableComponent::OwnershipTransferred",
         "kind": "nested"
       },
       {
         "name": "OwnershipTransferStarted",
-        "type": "openzeppelin::access::ownable::ownable::OwnableComponent::OwnershipTransferStarted",
+        "type": "openzeppelin_access::ownable::ownable::OwnableComponent::OwnershipTransferStarted",
         "kind": "nested"
       }
     ]
@@ -706,12 +756,11 @@ export const ABI = [
       },
       {
         "name": "OwnableEvent",
-        "type": "openzeppelin::access::ownable::ownable::OwnableComponent::Event",
+        "type": "openzeppelin_access::ownable::ownable::OwnableComponent::Event",
         "kind": "flat"
       }
     ]
   }
 ] as const;
 
-// Export alias for backward compatibility
 export const StarkOverflowABI = ABI;

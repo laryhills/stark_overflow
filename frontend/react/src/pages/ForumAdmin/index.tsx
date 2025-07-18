@@ -1,16 +1,24 @@
 import { useState, useEffect, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useContract } from "@hooks/useContract";
 import { useWallet } from "@hooks/useWallet";
 import { useAccount } from "@starknet-react/core";
 import { CircleNotch, Warning } from "phosphor-react";
-import { Button } from "./style";
+import { Button, AlertMessage } from "./style";
 import { InputForm } from "@components/InputForm";
 import { FormContainer } from "@components/Form";
+import { Forum } from "@app-types/index";
 
 
 
 export function ForumAdmin() {
+
+  const navigate = useNavigate();
+  const params = useParams<{ forumId?: string }>();
+  const forumId = params.forumId;
+  const isEditMode = !!forumId;
+
+
   const [name, setName] = useState("");
   const [iconUrl, setIconUrl] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -21,9 +29,8 @@ export function ForumAdmin() {
   const [imageError, setImageError] = useState(false)
   const [imageLoaded, setImageLoaded] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const [forum, setForum] = useState<Forum | null>(null);
 
-
-  const navigate = useNavigate();
   const { isConnected } = useAccount();
   const { openConnectModal } = useWallet();
   const {
@@ -32,7 +39,9 @@ export function ForumAdmin() {
     forumsLoading,
     forumsError,
     contractReady,
-    address
+    address,
+    updateForum,
+    fetchForum,
   } = useContract();
 
   const iconPreview = useMemo(() => {
@@ -70,6 +79,28 @@ export function ForumAdmin() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isConnected, address, contractReady]);
 
+  // Load forum data if in edit mode
+  useEffect(() => {
+    if (isEditMode && contractReady && isOwner) {
+      const loadForum = async () => {
+        try {
+          const forumData = await fetchForum(forumId);
+          if (forumData) {
+            setForum(forumData);
+            setName(forumData.name);
+            setIconUrl(forumData.icon_url);
+          } else {
+            setError("Forum not found");
+          }
+        } catch (error) {
+          console.error("Error loading forum:", error);
+          setError("Failed to load forum data");
+        }
+      };
+      loadForum();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isEditMode, forumId, contractReady, isOwner]);
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {}
@@ -97,6 +128,11 @@ export function ForumAdmin() {
       return;
     }
 
+    if (!name.trim()) {
+      setError("Forum name is required");
+      return;
+    }
+
     if (!validateForm()) return
 
     if (imageError) {
@@ -107,24 +143,26 @@ export function ForumAdmin() {
     setIsLoading(true);
 
     try {
-      const transactionHash = await createForum(name, iconUrl);
+      const transactionHash = isEditMode ? await updateForum(forumId, name, iconUrl) : await createForum(name, iconUrl);
 
       if (transactionHash) {
-        setSuccess(`Forum created successfully! Transaction: ${transactionHash}`);
+        setSuccess(`Forum ${isEditMode ? 'updated' : 'created'} successfully! Transaction: ${transactionHash}`);
         // Clear form
-        setName("");
-        setIconUrl("");
+        if (!isEditMode) {
+          setName("");
+          setIconUrl("");
+        }
 
         // Redirect to home after 3 seconds
         setTimeout(() => {
           navigate("/");
         }, 3000);
       } else {
-        setError("Failed to create forum. Please try again.");
+        setError(`Failed to ${isEditMode ? 'update' : 'create'} forum. Please try again.`);
       }
     } catch (error) {
-      console.error("Error creating forum:", error);
-      setError("Failed to create forum. Please try again.");
+      console.error(`Error ${isEditMode ? 'updating' : 'creating'} forum:`, error);
+      setError(`Failed to ${isEditMode ? 'update' : 'create'} forum. Please try again.`);
     } finally {
       setIsLoading(false);
     }
@@ -151,8 +189,8 @@ export function ForumAdmin() {
   if (!isConnected) {
     return (
       <div style={{ padding: "20px", textAlign: "center" }}>
-        <h1>Create Forum</h1>
-        <p>Please connect your wallet to create a forum</p>
+        <h1>{isEditMode ? "Update Forum" : "Create Forum"}</h1>
+        <p>Please connect your wallet to {isEditMode ? "update" : "create"} a forum</p>
       </div>
     );
   }
@@ -161,7 +199,7 @@ export function ForumAdmin() {
     return (
       <div style={{ padding: "20px", textAlign: "center" }}>
         <h1>Access Denied</h1>
-        <p>Only the contract owner can create forums</p>
+        <p>Only the contract owner can {isEditMode ? "update" : "create"} forums</p>
         <button
           onClick={() => navigate("/")}
           style={{
@@ -182,8 +220,13 @@ export function ForumAdmin() {
 
   return (
     <div style={{ padding: "20px", maxWidth: "600px", margin: "0 auto" }}>
-      <h1 style={{ marginBottom: "20px" }}>Create New Forum</h1>
-
+      <h1 style={{ marginBottom: "20px" }}>{isEditMode ? "Edit Forum" : "Create New Forum"}</h1>
+      {isEditMode && forum && (
+        <div style={{ marginBottom: "20px" }}>
+          <p><strong>Current Questions:</strong> {forum.total_questions}</p>
+          <p><strong>Total Amount:</strong> ${forum.amount}</p>
+        </div>
+      )}
       <FormContainer onSubmit={handleSubmit}>
         <InputForm
           id="name"
@@ -231,7 +274,9 @@ export function ForumAdmin() {
                   </div>
                 )}
               </div>
-              {imageError && <span style={{ fontSize: "13px", color: "#721c24" }}>Failed to load image</span>}
+              {imageError && <span style={{ fontSize: "13px", color: "#721c24" }}>
+                Failed to load image
+              </span>}
             </div>
           </div>
         )}
@@ -242,49 +287,27 @@ export function ForumAdmin() {
             Cancel
           </Button>
           <Button variant="create" type="submit" disabled={isLoading || forumsLoading}>
-            {isLoading ? "Creating Forum..." : "Create Forum"}
+            {isLoading ? `${isEditMode ? 'Updating' : 'Creating'} Forum...` : `${isEditMode ? 'Update' : 'Create'} Forum`}
           </Button>
         </div>
       </FormContainer>
 
       {error && (
-        <div style={{
-          marginTop: "20px",
-          padding: "10px",
-          backgroundColor: "#f8d7da",
-          color: "#721c24",
-          border: "1px solid #f5c6cb",
-          borderRadius: "5px"
-        }}>
+        <AlertMessage variant="error">
           {error}
-        </div>
+        </AlertMessage>
       )}
 
       {success && (
-        <div style={{
-          marginTop: "20px",
-          padding: "10px",
-          backgroundColor: "#d4edda",
-          color: "#155724",
-          border: "1px solid #c3e6cb",
-          borderRadius: "5px",
-          width: "100%"
-        }}>
+        <AlertMessage variant="success">
           {success}
-        </div>
+        </AlertMessage>
       )}
 
       {forumsError && (
-        <div style={{
-          marginTop: "20px",
-          padding: "10px",
-          backgroundColor: "#f8d7da",
-          color: "#721c24",
-          border: "1px solid #f5c6cb",
-          borderRadius: "5px"
-        }}>
+        <AlertMessage variant="error">
           Forum creation error: {forumsError}
-        </div>
+        </AlertMessage>
       )}
     </div>
   );

@@ -57,3 +57,14 @@ export const Button = styled.button<{ variant: "cancel" | "create" }>`
     gap: 4px;
   }
 `
+
+export const AlertMessage = styled.div<{ variant: "success" | "error" }>`
+  margin-top: 20px;
+  padding: 10px;
+  background-color: ${({ variant }) => variant === "success" ? "#d4edda" : "#f8d7da"};
+  color: ${({ variant }) => variant === "success" ? "#155724" : "#721c24"};
+  border: ${({ variant }) => variant === "success" ? "1px solid #c3e6cb" : "1px solid #f5c6cb"};
+  border-radius: 5px;
+  width: 100%;
+  font-size: 14px;
+`

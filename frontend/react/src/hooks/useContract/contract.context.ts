@@ -26,6 +26,8 @@ interface ContractContextType {
   fetchForums: () => Promise<Forum[]>
   fetchForum: (forumId: string) => Promise<Forum | null>
   createForum: (name: string, iconUrl: string) => Promise<string | null>
+  updateForum: (forumId: string, name: string, iconUrl: string) => Promise<string | null>
+  deleteForum: (forumId: string) => Promise<string | null>
   checkIsOwner: () => Promise<boolean>
   clearQuestionError: () => void
   clearAnswersError: () => void

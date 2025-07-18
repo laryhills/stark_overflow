@@ -13,6 +13,7 @@ export function Router() {
       <Route path="/forum/:name/question" element={<QuestionPage />} />
       <Route path="/forum/:name/question/:questionId" element={<AnswerPage />} />
       <Route path="/admin/create-forum" element={<ForumAdmin />} />
+      <Route path="/admin/edit-forum/:forumId" element={<ForumAdmin />} />
     </Routes>
   )
 }
