@@ -237,6 +237,7 @@ export function ForumAdmin() {
           value={name}
           validateForm={validateForm}
           setValue={setName}
+          maxLength={20}
         />
 
         <InputForm

@@ -1,8 +1,9 @@
 import { IconProps } from "phosphor-react";
 import { ErrorMessage, InputContainer, InputGroupContainer } from "./style";
 import { Label } from "@components/Label";
+import React from "react";
 
-interface InputFormProps {
+interface InputFormProps extends React.InputHTMLAttributes<HTMLInputElement> {
   id: string
   value: string
   label: string
@@ -15,7 +16,7 @@ interface InputFormProps {
   children?: React.ReactElement<IconProps>
 }
 
-export function InputForm({ label, tooltipText, error, value, id, placeholder, disabled = false, setValue, validateForm, children }: InputFormProps) {
+export function InputForm({ label, tooltipText, error, value, id, placeholder, disabled = false, setValue, validateForm, children, ...props }: InputFormProps) {
   return (
     <InputGroupContainer>
       <Label
@@ -36,6 +37,7 @@ export function InputForm({ label, tooltipText, error, value, id, placeholder, d
           onChange={(e) => setValue(e.target.value)}
           onKeyUp={() => validateForm && validateForm()}
           onBlur={() => validateForm && validateForm()}
+          {...props}
         />
       </InputContainer>
       {error && <ErrorMessage>{error}</ErrorMessage>}
