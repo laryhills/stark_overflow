@@ -15,6 +15,7 @@ pub trait IStarkOverflow<T> {
   // Questions
   fn ask_question(ref self: T, forum_id: u256, title: ByteArray, description: ByteArray, repository_url: ByteArray, tags: Array<ByteArray>, amount: u256) -> QuestionId;
   fn get_question(self: @T, question_id: u256) -> QuestionResponse;
+  fn get_questions(self: @T, page_size: u256, page: u256) -> (Array<QuestionResponse>, u256, bool); // (questions, total, has_next)
   fn stake_on_question(ref self: T, question_id: u256, amount: u256);
   fn get_total_staked_on_question(self: @T, question_id: u256) -> u256;
   fn get_staked_amount(self: @T, staker: ContractAddress, question_id: u256) -> u256;
@@ -195,6 +196,57 @@ pub mod StarkOverflow {
         status: found_question.status.read(),
       };
       question_response
+    }
+
+    fn get_questions(self: @ContractState, page_size: u256, page: u256) -> (Array<QuestionResponse>, u256, bool) {
+      assert(page_size > 0, 'PageSize must be greater than 0');
+      assert(page > 0, 'Page must be greater than 0');
+      
+      let total_questions = self.last_question_id.read();
+      
+      if total_questions == 0 {
+        return (array![], 0, false);
+      }
+
+      let page_first_question_idx = page_size * (page - 1) + 1; //2 * (3-1) + 1 = 5
+
+      if page_first_question_idx > total_questions {
+          return (array![], total_questions, false);
+      }
+
+      let mut page_last_question_idx = page_first_question_idx + page_size - 1;
+      if page_last_question_idx > total_questions {
+          page_last_question_idx = total_questions;
+      }
+
+      let mut questions_for_page = array![];
+      let mut current_index = page_first_question_idx;
+
+      while current_index <= page_last_question_idx {
+        let found_question = self.question_by_id.entry(current_index);
+        let mut tags = array![];
+        for i in 0..found_question.tags.len() {
+          let tag = found_question.tags.at(i).read();
+          tags.append(tag);
+        };
+        let question_response = QuestionResponse {
+          id: found_question.id.read(),
+          forum_id: found_question.forum_id.read(),
+          title: found_question.title.read(),
+          author: found_question.author.read(),
+          description: found_question.description.read(),
+          amount: found_question.amount.read(),
+          repository_url: found_question.repository_url.read(),
+          tags: tags,
+          status: found_question.status.read(),
+        };
+        questions_for_page.append(question_response);
+        current_index += 1;
+      };
+
+      let has_next_page = page_last_question_idx < total_questions;
+
+      (questions_for_page, total_questions, has_next_page)
     }
 
     fn get_answers(self: @ContractState, question_id: u256) -> Array<Answer> {

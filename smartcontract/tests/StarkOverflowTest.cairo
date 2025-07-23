@@ -355,3 +355,51 @@ fn it_should_not_be_able_to_retrieve_answers_for_a_non_existent_question() {
     }
   };
 }
+
+#[test]
+fn it_should_return_void_values_for_when_no_questions() {
+  let (_, stark_token_address) = deploy_mock_stark_token();
+  let (starkoverflow_dispatcher, _) = deploy_starkoverflow_contract(stark_token_address);
+  
+  let (questions, total, has_next) = starkoverflow_dispatcher.get_questions(10, 1);
+
+  assert_eq!(total, 0, "Total should be 0");
+  assert_eq!(questions.len(), 0, "Array should be empty");
+  assert_eq!(has_next, false, "Should not have next page");
+}
+
+#[test]
+fn it_should_return_paginated_questions() {
+  let (stark_token_dispatcher, stark_token_address) = deploy_mock_stark_token();
+  let (starkoverflow_dispatcher, starkoverflow_contract_address) = deploy_starkoverflow_contract(stark_token_address);
+
+  let forum_id = create_forum(starkoverflow_dispatcher, starkoverflow_contract_address);
+
+  let mut total_questions: u32 = 0;
+  while total_questions < 5 {
+    ask_question(starkoverflow_dispatcher, stark_token_dispatcher, forum_id);
+    total_questions += 1;
+  };
+
+  let (questions_page1, total, has_next) = starkoverflow_dispatcher.get_questions(2, 1);
+  assert_eq!(total, 5, "Page 1: Total should be 5");
+  assert_eq!(questions_page1.len(), 2, "Page 1: Should have 2 questions");
+  assert_eq!(has_next, true, "Page 1: Should have next page");
+  assert_eq!(*questions_page1.at(0).id, 1, "Page 1: First ID should be 1");
+  assert_eq!(*questions_page1.at(1).id, 2, "Page 1: Second ID should be 2");
+
+  let (questions_page2, _, has_next) = starkoverflow_dispatcher.get_questions(2, 2);
+  assert_eq!(questions_page2.len(), 2, "Page 2: Should have 2 questions");
+  assert_eq!(has_next, true, "Page 2: Should have next page");
+  assert_eq!(*questions_page2.at(0).id, 3, "Page 2: First ID should be 3");
+  assert_eq!(*questions_page2.at(1).id, 4, "Page 2: Second ID should be 4");
+
+  let (questions_page3, _, has_next) = starkoverflow_dispatcher.get_questions(2, 3);
+  assert_eq!(questions_page3.len(), 1, "Page 3: Should have 1 question");
+  assert_eq!(has_next, false, "Page 3: Should NOT have next page");
+  assert_eq!(*questions_page3.at(0).id, 5, "Page 3: First ID should be 5");
+
+  let (questions_page4, _, has_next) = starkoverflow_dispatcher.get_questions(2, 4);
+  assert_eq!(questions_page4.len(), 0, "Page 4: Should have 0 questions");
+  assert_eq!(has_next, false, "Page 4: Should NOT have next page");
+}
