@@ -15,7 +15,7 @@ pub trait IStarkOverflow<T> {
   // Questions
   fn ask_question(ref self: T, forum_id: u256, title: ByteArray, description: ByteArray, repository_url: ByteArray, tags: Array<ByteArray>, amount: u256) -> QuestionId;
   fn get_question(self: @T, question_id: u256) -> QuestionResponse;
-  fn get_questions(self: @T, page_size: u256, page: u256) -> (Array<QuestionResponse>, u256, bool); // (questions, total, has_next)
+  fn get_questions(self: @T, forum_id: u256, page_size: u64, page: u64) -> (Array<QuestionResponse>, u64, bool); // (questions, total, has_next)
   fn stake_on_question(ref self: T, question_id: u256, amount: u256);
   fn get_total_staked_on_question(self: @T, question_id: u256) -> u256;
   fn get_staked_amount(self: @T, staker: ContractAddress, question_id: u256) -> u256;
@@ -198,32 +198,33 @@ pub mod StarkOverflow {
       question_response
     }
 
-    fn get_questions(self: @ContractState, page_size: u256, page: u256) -> (Array<QuestionResponse>, u256, bool) {
+    fn get_questions(self: @ContractState, forum_id: u256, page_size: u64, page: u64) -> (Array<QuestionResponse>, u64, bool) {
       assert(page_size > 0, 'PageSize must be greater than 0');
       assert(page > 0, 'Page must be greater than 0');
       
-      let total_questions = self.last_question_id.read();
+      let total_forum_questions = self.questions_ids_by_forum_id.entry(forum_id).len();
       
-      if total_questions == 0 {
+      if total_forum_questions == 0 {
         return (array![], 0, false);
       }
 
       let page_first_question_idx = page_size * (page - 1) + 1; //2 * (3-1) + 1 = 5
 
-      if page_first_question_idx > total_questions {
-          return (array![], total_questions, false);
+      if page_first_question_idx > total_forum_questions {
+        return (array![], total_forum_questions, false);
       }
 
       let mut page_last_question_idx = page_first_question_idx + page_size - 1;
-      if page_last_question_idx > total_questions {
-          page_last_question_idx = total_questions;
+      if page_last_question_idx > total_forum_questions {
+        page_last_question_idx = total_forum_questions;
       }
 
       let mut questions_for_page = array![];
       let mut current_index = page_first_question_idx;
 
       while current_index <= page_last_question_idx {
-        let found_question = self.question_by_id.entry(current_index);
+        let question_id = self.questions_ids_by_forum_id.entry(forum_id).at(current_index - 1).read();
+        let found_question = self.question_by_id.entry(question_id);
         let mut tags = array![];
         for i in 0..found_question.tags.len() {
           let tag = found_question.tags.at(i).read();
@@ -244,9 +245,9 @@ pub mod StarkOverflow {
         current_index += 1;
       };
 
-      let has_next_page = page_last_question_idx < total_questions;
+      let has_next_page = page_last_question_idx < total_forum_questions;
 
-      (questions_for_page, total_questions, has_next_page)
+      (questions_for_page, total_forum_questions, has_next_page)
     }
 
     fn get_answers(self: @ContractState, question_id: u256) -> Array<Answer> {
