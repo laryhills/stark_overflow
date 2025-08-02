@@ -19,9 +19,12 @@ export interface Uint256 {
 
 export interface Question {
   id: bigint | number | Uint256;
+  forum_id: bigint | number | Uint256;
+  title: string;
   author: bigint;
   description: string;
-  value: bigint | number | Uint256;
+  amount: bigint | number | Uint256;
+  repository_url: string;
   status: CairoCustomEnum;
   tags?: string[];
 }

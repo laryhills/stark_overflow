@@ -295,6 +295,30 @@ export const ABI = [
       },
       {
         "type": "function",
+        "name": "get_questions",
+        "inputs": [
+          {
+            "name": "forum_id",
+            "type": "core::integer::u256"
+          },
+          {
+            "name": "page_size",
+            "type": "core::integer::u64"
+          },
+          {
+            "name": "page",
+            "type": "core::integer::u64"
+          }
+        ],
+        "outputs": [
+          {
+            "type": "(core::array::Array::<stark_overflow::structs::SerialStructs::QuestionResponse>, core::integer::u64, core::bool)"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "type": "function",
         "name": "stake_on_question",
         "inputs": [
           {
@@ -341,22 +365,6 @@ export const ABI = [
         "outputs": [
           {
             "type": "core::integer::u256"
-          }
-        ],
-        "state_mutability": "view"
-      },
-      {
-        "type": "function",
-        "name": "get_questions",
-        "inputs": [
-          {
-            "name": "forum_id",
-            "type": "core::integer::u256"
-          }
-        ],
-        "outputs": [
-          {
-            "type": "core::array::Array::<stark_overflow::structs::SerialStructs::QuestionResponse>"
           }
         ],
         "state_mutability": "view"
@@ -762,5 +770,6 @@ export const ABI = [
     ]
   }
 ] as const;
+
 
 export const StarkOverflowABI = ABI;

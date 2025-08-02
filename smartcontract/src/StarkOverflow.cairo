@@ -207,7 +207,7 @@ pub mod StarkOverflow {
       if total_forum_questions == 0 {
         return (array![], 0, false);
       }
-
+      
       let page_first_question_idx = page_size * (page - 1) + 1; //2 * (3-1) + 1 = 5
 
       if page_first_question_idx > total_forum_questions {

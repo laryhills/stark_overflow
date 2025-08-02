@@ -21,6 +21,12 @@ export function ContractProvider({ children }: ContractProviderProps) {
     transactionHash: null
   })
 
+  const [questionsState, setQuestionsState] = useState<ContractState>({
+    isLoading: false,
+    error: null,
+    transactionHash: null
+  })
+
   const [answersState, setAnswersState] = useState<ContractState>({
     isLoading: false,
     error: null,
@@ -72,6 +78,39 @@ export function ContractProvider({ children }: ContractProviderProps) {
   const getContractForReading = useCallback(() => readOnlyContract || contract, [readOnlyContract, contract])
   const getContractForWriting = useCallback(() => contract, [contract])
 
+
+
+  // Question functions
+  const fetchQuestions = useCallback(async (forumId: string, page: number, pageSize: number): Promise<{
+    questions: Question[],
+    totalQuestions: number,
+    hasNextPage: boolean
+  }> => {
+    const contractInstance = getContractForReading()
+    if (!contractInstance) {
+      setQuestionsState({ isLoading: false, error: ERROR_MESSAGES.CONTRACT_NOT_INITIALIZED, transactionHash: null })
+      return { questions: [], totalQuestions: 0, hasNextPage: false }
+    }
+
+    setQuestionsState({ isLoading: true, error: null, transactionHash: null })
+    try {
+      const contractQuestionsResponse = await contractInstance.get_questions(BigInt(forumId), BigInt(pageSize), BigInt(page))
+
+      const contractQuestions = contractQuestionsResponse[0] as unknown as ContractQuestion[]
+      const totalQuestions = contractQuestionsResponse[1] as unknown as bigint
+      const hasNextPage = contractQuestionsResponse[2] as unknown as boolean
+
+
+      const questions = contractQuestions.map(contractQuestion => contractQuestionToFrontend(contractQuestion))
+
+      setQuestionsState({ isLoading: false, error: null, transactionHash: null })
+      return { questions, totalQuestions: Number(totalQuestions), hasNextPage }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Failed to fetch questions"
+      setQuestionsState({ isLoading: false, error: errorMessage, transactionHash: null })
+      return { questions: [], totalQuestions: 0, hasNextPage: false }
+    }
+  }, [getContractForReading])
 
   const fetchQuestion = useCallback(async (questionId: number): Promise<Question | null> => {
     const contractInstance = await getContractForReading()
@@ -467,6 +506,8 @@ export function ContractProvider({ children }: ContractProviderProps) {
       contractReady: !!(readOnlyContract || contract),
       isConnected,
       address,
+      questionsLoading: questionsState.isLoading,
+      questionsError: questionsState.error,
       questionLoading: questionState.isLoading,
       answersLoading: answersState.isLoading,
       questionError: questionState.error,
@@ -479,6 +520,7 @@ export function ContractProvider({ children }: ContractProviderProps) {
       forumsError: forumsState.error,
       ownerLoading: ownerState.isLoading,
       ownerError: ownerState.error,
+      fetchQuestions,
       fetchQuestion,
       fetchAnswers,
       fetchForums,

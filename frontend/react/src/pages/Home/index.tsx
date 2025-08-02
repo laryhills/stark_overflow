@@ -21,7 +21,7 @@ export function Home() {
     address
   } = useContract();
 
-  // Fetch forums on mount
+
   useEffect(() => {
     if (contractReady) {
       const loadForums = async () => {
@@ -33,7 +33,6 @@ export function Home() {
     }
   }, [contractReady, fetchForums]);
 
-  // Check if user is owner when address changes
   useEffect(() => {
     if (isConnected && address && contractReady) {
       const checkOwnership = async () => {

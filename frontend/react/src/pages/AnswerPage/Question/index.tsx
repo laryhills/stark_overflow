@@ -21,7 +21,7 @@ export function Question({ question }: QuestionProps) {
     <QuestionContainer>
       <QuestionHeader>
         <UserAvatar
-          src={`https://avatars.dicebear.com/api/identicon/${question.authorAddress}.svg`}
+          src={question.authorAvatar}
           alt={question.authorName}
         />
         <div>
