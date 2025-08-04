@@ -7,6 +7,8 @@ import {
   ForumContainer,
   ForumList,
   Header,
+  PageSizeSelector,
+  PaginationContainer,
   TopicAvatar,
   TopicCard,
   TopicFooter,
@@ -32,9 +34,9 @@ export function Forum() {
 
 function ForumContent() {
   const { name } = useParams<{ name: string }>()
-  const [searchParams] = useSearchParams()
+  const [searchParams, setSearchParams] = useSearchParams()
   const forumName = name || ""
-  const pageSize = Number(searchParams.get("pageSize")) || 10
+  const [pageSize, setPageSize] = useState(Number(searchParams.get("page_size")) || 10)
 
   const [questions, setQuestions] = useState<QuestionType[]>([])
   const [filteredQuestions, setFilteredQuestions] = useState<QuestionType[]>([])
@@ -105,6 +107,14 @@ function ForumContent() {
     setFilteredQuestions(filtered)
   }
 
+  const handlePageSizeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newPageSize = Number(e.target.value)
+    setPageSize(newPageSize)
+    setSearchParams({ page_size: newPageSize.toString() })
+    setCurrentPage(1)
+    loadInitialQuestions()
+  }
+
   // Loading state
   if (!contractReady || questionsLoading) {
     return (
@@ -168,9 +178,16 @@ function ForumContent() {
         </NavLink>
       </Header>
 
-      <div style={{ marginBottom: "20px", color: "#666" }}>
-        <p>Showing {filteredQuestions.length} of {totalQuestions} questions</p>
-      </div>
+      <PaginationContainer>
+        <p>Page size:</p>
+        <PageSizeSelector value={pageSize} onChange={handlePageSizeChange}>
+          <option value={10}>10</option>
+          <option value={20}>20</option>
+          <option value={50}>50</option>
+          <option value={100}>100</option>
+        </PageSizeSelector>
+        <p style={{ flex: 1, textAlign: "right" }}>Showing {filteredQuestions.length} of {totalQuestions} questions</p>
+      </PaginationContainer>
 
       <ForumList>
         {filteredQuestions.map((question) => (

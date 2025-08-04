@@ -41,6 +41,41 @@ export const Header = styled.header`
   }
 `;
 
+export const PaginationContainer = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+  width: 100%;
+
+  p {
+    color: #666;
+  }
+`;
+
+export const PageSizeSelector = styled.select`
+  padding: 6px;
+  padding-right: 1rem;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  background: ${({ theme }) => theme.background};
+  color: ${({ theme }) => theme.text};
+  border: 1px solid ${({ theme }) => theme.primary};
+  border-radius: 4px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background: transparent;
+  background-image: url("data:image/svg+xml;utf8,<svg fill='purple' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/><path d='M0 0h24v24H0z' fill='none'/></svg>");
+  background-repeat: no-repeat;
+  background-position-x: 100%;
+  background-position-y: 5px;
+
+`;
+
 export const Button = styled.button`
   background: #7c3aed;
   color: #fff;
