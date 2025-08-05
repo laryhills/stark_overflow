@@ -47,9 +47,7 @@ export const contractQuestionToFrontend = (contractQuestion: ContractQuestion): 
 
   return {
     id: contractQuestion.id.toString(),
-    title: contractQuestion.description.length > 60
-      ? contractQuestion.description.substring(0, 60) + "..."
-      : contractQuestion.description,
+    title: contractQuestion.title,
     content: contractQuestion.description,
     authorAddress: authorAddress,
     authorAvatar: `https://api.dicebear.com/9.x/avataaars/svg?seed=${authorAddress}`,
