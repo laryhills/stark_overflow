@@ -3,11 +3,14 @@ import { StarknetTypedContract } from "@starknet-react/core"
 import { Question, Answer, Forum, StarkOverflowABI } from '@app-types/index'
 import { Uint256 } from '@app-types/contract-types'
 
+
 interface ContractContextType {
   contract: StarknetTypedContract<typeof StarkOverflowABI> | undefined
   contractReady: boolean
   isConnected: boolean | undefined
   address: string | undefined
+  questionsLoading: boolean
+  questionsError: string | null
   questionLoading: boolean
   answersLoading: boolean
   questionError: string | null
@@ -16,11 +19,19 @@ interface ContractContextType {
   markCorrectError: string | null
   stakingLoading: boolean
   stakingError: string | null
+
   // Forum functions
   forumsLoading: boolean
   forumsError: string | null
   ownerLoading: boolean
   ownerError: string | null
+
+  // Question functions
+  fetchQuestions: (forumId: string, page: number, pageSize: number) => Promise<{
+    questions: Question[],
+    totalQuestions: number,
+    hasNextPage: boolean
+  }>
   fetchQuestion: (questionId: number) => Promise<Question | null>
   fetchAnswers: (questionId: number) => Promise<Answer[]>
   fetchForums: () => Promise<Forum[]>

@@ -3,6 +3,7 @@ export type Question = {
   title: string;
   content: string;
   authorAddress: string;
+  authorAvatar: string;
   authorName: string;
   timestamp: string;
   stakeAmount: number;

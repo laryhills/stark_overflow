@@ -47,7 +47,6 @@ function AnswerPageContent() {
     if (questionId && contractReady) {
       const loadQuestion = async () => {
         const contractQuestion = await fetchQuestion(questionId)
-        console.log("contractQuestion", contractQuestion)
         if (contractQuestion) {
           setQuestion(contractQuestion)
           setRetryAttempts(0) // Reset retry attempts on success

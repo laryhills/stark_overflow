@@ -42,16 +42,15 @@ export const contractQuestionToFrontend = (contractQuestion: ContractQuestion): 
   const authorAddress = formatters.bigIntToAddress(contractQuestion.author)
   const status = formatters.formatStatus(contractQuestion.status)
   const authorName = generateMockAuthorName(authorAddress)
-  const weiValue = formatters.bigIntToNumber(contractQuestion.value)
+  const weiValue = formatters.bigIntToNumber(contractQuestion.amount)
   const decimalValue = formatters.convertWeiToDecimal(weiValue)
 
   return {
     id: contractQuestion.id.toString(),
-    title: contractQuestion.description.length > 60
-      ? contractQuestion.description.substring(0, 60) + "..."
-      : contractQuestion.description,
+    title: contractQuestion.title,
     content: contractQuestion.description,
     authorAddress: authorAddress,
+    authorAvatar: `https://api.dicebear.com/9.x/avataaars/svg?seed=${authorAddress}`,
     authorName,
     timestamp: generateMockTimestamp(),
     stakeAmount: decimalValue,
