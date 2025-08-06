@@ -74,6 +74,10 @@ export const PageSizeSelector = styled.select`
   background-position-x: 100%;
   background-position-y: 5px;
 
+  option {
+    background: ${({ theme }) => theme.background};
+    color: ${({ theme }) => theme.text};
+  }
 `;
 
 export const Button = styled.button`
