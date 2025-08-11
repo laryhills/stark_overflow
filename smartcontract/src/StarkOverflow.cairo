@@ -399,18 +399,25 @@ pub mod StarkOverflow {
       }
       self.answer_by_id.entry(answer_id).write(updated_answer);
 
-      // Update author reputation
-      let author_reputation = self.reputation.entry(answer_author).read();
+      // Update author reputation and calculate actual change
+      let old_reputation = self.reputation.entry(answer_author).read();
       let new_reputation = if vote {
-        author_reputation + 1 // Upvote increases reputation
+        old_reputation + 1 // Upvote increases reputation
       } else {
-        if author_reputation > 0 {
-          author_reputation - 1 // Downvote decreases reputation
+        if old_reputation > 0 {
+          old_reputation - 1 // Downvote decreases reputation
         } else {
           0
         }
       };
       self.reputation.entry(answer_author).write(new_reputation);
+
+      // Calculate actual reputation change based on what actually happened
+      let actual_reputation_change = if new_reputation >= old_reputation {
+        new_reputation - old_reputation
+      } else {
+        old_reputation - new_reputation 
+      };
 
       // Emit vote cast event
       self
@@ -420,7 +427,7 @@ pub mod StarkOverflow {
             answer_id,
             is_upvote: vote,
             answer_author: answer_author,
-            reputation_change: 1,
+            reputation_change: actual_reputation_change,
           },
         );
     }
